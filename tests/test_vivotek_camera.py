@@ -1,7 +1,7 @@
 import unittest
 import vcr
 
-from libpyvivotek.vivotek import VivotekCamera
+from libpyvivotek.vivotek import VivotekCamera, VivotekCameraError
 
 TEST_CONNECTION_DETAILS = dict(
     host ='fake_ip.local',
@@ -16,6 +16,11 @@ class TestVivotekCamera(unittest.TestCase):
 
     def setUp(self):
         self.cam = VivotekCamera(**TEST_CONNECTION_DETAILS)
+
+    def test_get_param_error(self):
+        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_get_param_error.yaml'):
+            with self.assertRaises(VivotekCameraError):
+                self.cam.get_param('bogus_param')
 
     def test_event_enabled_false(self):
         with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_event_enabled_false.yaml'):

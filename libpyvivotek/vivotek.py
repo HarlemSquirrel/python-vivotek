@@ -9,12 +9,10 @@ DEFAULT_PATHS = {
 }
 
 class VivotekCameraError(Exception):
-    def __init__(self, code ):
-        super(VivotekCameraError, self).__init__()
-        self.code = int(code)
-
-    def __str__(self):
-        return  'ErrorCode: %s' % self.code
+    """Custom Error class for VivotekCamera"""
+    def __init__(self, message, errors=[]):
+        super().__init__(message)
+        self.errors = errors
 
 class VivotekCamera(object):
     """A python implementation of the Vivotek IB8369A"""
@@ -59,7 +57,13 @@ class VivotekCamera(object):
                 timeout=10,
                 verify=self.verify_ssl,
             )
-            return response.content.decode("utf-8").strip().split("=")[1]
+
+            response_text = response.content.decode("utf-8").strip()
+
+            if 'ERROR' in response_text:
+                raise VivotekCameraError(response_text)
+
+            return response_text.split("=")[1]
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError(error)
 
@@ -68,6 +72,6 @@ class VivotekCamera(object):
         """Return the model name of the camera."""
         try:
             return self._model_name
-        except Exception as e:
+        except AttributeError:
             self._model_name = self.get_param("system_info_modelname").replace("'", "")
             return self._model_name
