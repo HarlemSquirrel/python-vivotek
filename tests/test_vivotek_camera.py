@@ -12,7 +12,7 @@ TEST_CONNECTION_DETAILS = dict(
 )
 
 class TestVivotekCamera(unittest.TestCase):
-    """docstring for TestVivotekCamera."""
+    """Tests for VivotekCamera."""
 
     def setUp(self):
         self.cam = VivotekCamera(**TEST_CONNECTION_DETAILS)
