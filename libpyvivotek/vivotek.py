@@ -61,7 +61,7 @@ class VivotekCamera(object):
             )
             return response.content.decode("utf-8").strip().split("=")[1]
         except requests.exceptions.RequestException as error:
-            _LOGGER.error("Error getting Vivotek camera parameter: %s", error)
+            raise VivotekCameraError(error)
 
     @property
     def model_name(self):
