@@ -67,6 +67,26 @@ class VivotekCamera(object):
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError(error)
 
+    def set_param(self, param, value):
+        """Set and return the value of the provided key."""
+        try:
+            response = requests.post(
+                self._set_param_url,
+                auth=self._requests_auth,
+                data={ param: value },
+                timeout=10,
+                verify=self.verify_ssl,
+            )
+
+            response_text = response.content.decode("utf-8").strip()
+
+            if 'ERROR' in response_text:
+                raise VivotekCameraError(response_text)
+
+            return response_text.split("=")[1]
+        except requests.exceptions.RequestException as error:
+            raise VivotekCameraError(error)
+
     @property
     def model_name(self):
         """Return the model name of the camera."""

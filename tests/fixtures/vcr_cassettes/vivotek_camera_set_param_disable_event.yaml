@@ -1,0 +1,82 @@
+interactions:
+- request:
+    body: event_i0_enable=0
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic dGVzdF91c2VyOnQzc3RfcEA1NXcwcmRa
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '17'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://fake_ip.local/cgi-bin/admin/setparam.cgi
+  response:
+    body:
+      string: "event_i0_enable='0'\r\n"
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-control:
+      - no-cache
+      Connection:
+      - close
+      Content-length:
+      - '21'
+      Content-type:
+      - text/plain
+      Date:
+      - Mon, 02 Sep 2019 14:50:00 GMT
+      Pragma:
+      - no-cache
+      Server:
+      - Web Server
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic dGVzdF91c2VyOnQzc3RfcEA1NXcwcmRa
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://fake_ip.local/cgi-bin/admin/getparam.cgi?event_i0_enable
+  response:
+    body:
+      string: "event_i0_enable='0'\r\n"
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-control:
+      - no-cache
+      Connection:
+      - close
+      Content-length:
+      - '21'
+      Content-type:
+      - text/plain
+      Date:
+      - Mon, 02 Sep 2019 14:50:01 GMT
+      Pragma:
+      - no-cache
+      Server:
+      - Web Server
+    status:
+      code: 200
+      message: OK
+version: 1
