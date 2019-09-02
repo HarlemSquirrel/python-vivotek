@@ -47,6 +47,20 @@ class VivotekCamera(object):
         response = self.get_param(event_key)
         return int(response.replace("'", "")) == 1
 
+    def snapshot(self):
+        """Return the bytes of current still image."""
+        try:
+            response = requests.get(
+                self._still_image_url,
+                auth=self._requests_auth,
+                timeout=10,
+                verify=self.verify_ssl,
+            )
+
+            return response.content
+        except requests.exceptions.RequestException as error:
+            raise VivotekCameraError(error)
+
     def get_param(self, param):
         """Return the value of the provided key."""
         try:
