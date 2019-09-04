@@ -1,6 +1,6 @@
 # python-vivotek
 
-[![Build Status](https://travis-ci.org/HarlemSquirrelpython-vivotek.svg?branch=master)](https://travis-ci.org/HarlemSquirrelpython-vivotek)
+[![Build Status](https://travis-ci.org/HarlemSquirrel/python-vivotek.svg?branch=master)](https://travis-ci.org/HarlemSquirrel/python-vivotek)
 
 A Python library for Vivotek IP cameras.
 
