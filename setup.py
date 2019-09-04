@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='libpyvivotek',
-    version='0.1',
+    version='0.1.1',
     description='Python Library for Vivotek IP Cameras',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -21,7 +21,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.5',
+    python_requires='>=3.4',
     keywords=['vivotek', 'Camera', 'IPC'],
     test_suite="tests",
 )
