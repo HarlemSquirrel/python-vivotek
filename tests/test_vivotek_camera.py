@@ -45,12 +45,12 @@ class TestVivotekCamera(unittest.TestCase):
 
     def test_set_param_enable_event(self):
         with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_enable_event.yaml'):
-            self.assertEqual(self.cam.set_param('event_i0_enable', 1), "'1'")
+            self.assertEqual(self.cam.set_param('event_i0_enable', 1), "1")
             self.assertTrue(self.cam.event_enabled('event_i0_enable'))
 
     def test_set_param_disable_event(self):
         with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_disable_event.yaml'):
-            self.assertEqual(self.cam.set_param('event_i0_enable', 0), "'0'")
+            self.assertEqual(self.cam.set_param('event_i0_enable', 0), "0")
             self.assertFalse(self.cam.event_enabled('event_i0_enable'))
 
 

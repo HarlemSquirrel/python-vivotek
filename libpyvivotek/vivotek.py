@@ -72,12 +72,7 @@ class VivotekCamera(object):
                 verify=self.verify_ssl,
             )
 
-            response_text = response.content.decode("utf-8").strip()
-
-            if 'ERROR' in response_text:
-                raise VivotekCameraError(response_text)
-
-            return response_text.split("=")[1]
+            return self.__parse_response_value(response)
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError(error)
 
@@ -92,12 +87,7 @@ class VivotekCamera(object):
                 verify=self.verify_ssl,
             )
 
-            response_text = response.content.decode("utf-8").strip()
-
-            if 'ERROR' in response_text:
-                raise VivotekCameraError(response_text)
-
-            return response_text.split("=")[1]
+            return self.__parse_response_value(response)
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError(error)
 
@@ -109,3 +99,14 @@ class VivotekCamera(object):
         except AttributeError:
             self._model_name = self.get_param("system_info_modelname").replace("'", "")
             return self._model_name
+
+    def __parse_response_value(self, response):
+        """
+        Parse the response from an API call and return the value only.
+        This assumes the response is in the key='value' format.
+        An error will be raised when ERROR is found in the body of the response.
+        """
+        if 'ERROR' in response.text:
+            raise VivotekCameraError(response.text)
+
+        return response.text.strip().split('=')[1].replace("'", "")

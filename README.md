@@ -65,27 +65,27 @@ snapshot.show()
 
 ```py
 cam.get_param('capability_api_httpversion')
-# "'0311b_1'"
+# "0311b_1"
 
 cam.get_param('capability_naudioin')
-# "'0'"
+# "0"
 
 cam.get_param('capability_protocol_https')
-# "'1'"
+# "1"
 
 cam.get_param('event_i0_enable')
-# "'1'"
+# "1"
 
 cam.get_param('motion_c0_enable')
-# "'1'"
+# "1"
 ```
 
 ### Setting parameters
 
 ```py
 cam.set_param('event_i0_enable', 1)
-# "'1'"
+# "1"
 
 cam.set_param('event_i0_enable', 0)
-# "'0'"
+# "0"
 ```
