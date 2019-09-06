@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='libpyvivotek',
-    version='0.1.1',
+    version='0.2.0',
     description='Python Library for Vivotek IP Cameras',
     long_description=long_description,
     long_description_content_type="text/markdown",
