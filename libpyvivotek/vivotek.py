@@ -15,6 +15,8 @@ class VivotekCameraError(Exception):
 class VivotekCamera():
     """A Vivotek IB8369A camera object"""
 
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-arguments
     def __init__(self, host, port, usr, pwd, ssl=None, verify_ssl=True):
         """
         Initialize a camera.
