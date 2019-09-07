@@ -1,1 +1,2 @@
+pylint>=2.3
 vcrpy>=2.0
