@@ -93,9 +93,9 @@ class VivotekCamera():
         """Return the model name of the camera."""
         if self._model_name is not None:
             return self._model_name
-        else:
-            self._model_name = self.get_param("system_info_modelname")
-            return self._model_name
+
+        self._model_name = self.get_param("system_info_modelname")
+        return self._model_name
 
     @staticmethod
     def __parse_response_value(response):
