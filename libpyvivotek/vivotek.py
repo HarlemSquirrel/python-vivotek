@@ -1,3 +1,4 @@
+"""A python implementation of the Vivotek IB8369A"""
 import requests
 from requests.auth import HTTPBasicAuth
 
@@ -10,25 +11,21 @@ DEFAULT_PATHS = {
 
 class VivotekCameraError(Exception):
     """Custom Error class for VivotekCamera"""
-    def __init__(self, message, errors=[]):
-        super().__init__(message)
-        self.errors = errors
 
-class VivotekCamera(object):
-    """A python implementation of the Vivotek IB8369A"""
+class VivotekCamera():
+    """A Vivotek IB8369A camera object"""
 
-    def __init__(self, host, port, usr, pwd, daemon=False, ssl=None, verify_ssl=True, verbose=True):
+    def __init__(self, host, port, usr, pwd, ssl=None, verify_ssl=True):
         """
         Initialize a camera.
         """
         self.host = host
         self.port = port
         self._requests_auth = HTTPBasicAuth(usr, pwd)
-        self.daemon = daemon
-        self.verbose = verbose
+        self._model_name = None
 
         self.ssl = ssl
-        if port==443 and ssl is None:
+        if port == 443 and ssl is None:
             self.ssl = True
         if self.ssl is None:
             self.ssl = False
@@ -82,7 +79,7 @@ class VivotekCamera(object):
             response = requests.post(
                 self._set_param_url,
                 auth=self._requests_auth,
-                data={ param: value },
+                data={param: value},
                 timeout=10,
                 verify=self.verify_ssl,
             )
@@ -94,13 +91,14 @@ class VivotekCamera(object):
     @property
     def model_name(self):
         """Return the model name of the camera."""
-        try:
+        if self._model_name is not None:
             return self._model_name
-        except AttributeError:
-            self._model_name = self.get_param("system_info_modelname").replace("'", "")
+        else:
+            self._model_name = self.get_param("system_info_modelname")
             return self._model_name
 
-    def __parse_response_value(self, response):
+    @staticmethod
+    def __parse_response_value(response):
         """
         Parse the response from an API call and return the value only.
         This assumes the response is in the key='value' format.
