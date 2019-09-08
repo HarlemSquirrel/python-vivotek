@@ -2,8 +2,7 @@
 release:
 	rm -rf dist
 	python3 setup.py sdist bdist_wheel
-	#twine upload dist/*
-	# python3 -m twine upload
+	python3 -m twine upload dist/*
 
 .PHONY: test
 test:
