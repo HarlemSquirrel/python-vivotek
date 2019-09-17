@@ -108,5 +108,7 @@ class VivotekCamera():
         """
         if 'ERROR' in response.text:
             raise VivotekCameraError(response.text)
+        elif response.status_code == 401:
+            raise VivotekCameraError('Unauthorized. Credentials may be invalid.')
 
         return response.text.strip().split('=')[1].replace("'", "")

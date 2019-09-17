@@ -24,6 +24,16 @@ class TestVivotekCamera(unittest.TestCase):
             with self.assertRaises(VivotekCameraError):
                 self.cam.get_param('bogus_param')
 
+    def test_get_param_invalid_credentials(self):
+        cam_args = TEST_CONNECTION_DETAILS.copy()
+        cam_args.update(pwd='badpassword')
+        self.cam = VivotekCamera(**cam_args)
+        error_msg = 'Unauthorized. Credentials may be invalid.'
+
+        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_get_param_invalid_credentials.yaml'):
+            with self.assertRaises(VivotekCameraError, msg=error_msg):
+                self.cam.get_param('capability_api_httpversion')
+
     def test_event_enabled_false(self):
         with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_event_enabled_false.yaml'):
             self.assertFalse(self.cam.event_enabled('event_i0_enable'))
@@ -42,6 +52,16 @@ class TestVivotekCamera(unittest.TestCase):
         with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_error.yaml'):
             with self.assertRaises(VivotekCameraError):
                 self.cam.set_param('bogus_param', 'some_value')
+
+    def test_set_param_invalid_credentials(self):
+        cam_args = TEST_CONNECTION_DETAILS.copy()
+        cam_args.update(pwd='badpassword')
+        self.cam = VivotekCamera(**cam_args)
+        error_msg = 'Unauthorized. Credentials may be invalid.'
+
+        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_invalid_credentials.yaml'):
+            with self.assertRaises(VivotekCameraError, msg=error_msg):
+                self.cam.set_param('event_i0_enable', 0)
 
     def test_set_param_enable_event(self):
         with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_enable_event.yaml'):
