@@ -5,6 +5,7 @@ from requests.auth import HTTPBasicAuth
 DEFAULT_EVENT_0_KEY = "event_i0_enable"
 DEFAULT_PATHS = {
     "get": "/cgi-bin/admin/getparam.cgi",
+    "get_anon": "/cgi-bin/anonymous/getparam.cgi",
     "set": "/cgi-bin/admin/setparam.cgi",
     "still": "/cgi-bin/viewer/video.jpg",
 }
@@ -38,6 +39,7 @@ class VivotekCamera():
 
         _protocol = 'https' if self.ssl else 'http'
         self._get_param_url = _protocol + "://" + self.host + DEFAULT_PATHS["get"]
+        self._get_anon_param_url = _protocol + "://" + self.host + DEFAULT_PATHS["get_anon"]
         self._set_param_url = _protocol + "://" + self.host + DEFAULT_PATHS["set"]
         self._still_image_url = _protocol + "://" + self.host + DEFAULT_PATHS["still"]
 
@@ -75,6 +77,20 @@ class VivotekCamera():
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError(error)
 
+    def get_param_anon(self, param):
+        """Retrieve anonymously and return the value of the provided key."""
+        try:
+            response = requests.get(
+                self._get_anon_param_url,
+                params=(param),
+                timeout=10,
+                verify=self.verify_ssl,
+            )
+
+            return self.__parse_response_value(response)
+        except requests.exceptions.RequestException as error:
+            raise VivotekCameraError(error)
+
     def set_param(self, param, value):
         """Set and return the value of the provided key."""
         try:
@@ -96,7 +112,7 @@ class VivotekCamera():
         if self._model_name is not None:
             return self._model_name
 
-        self._model_name = self.get_param("system_info_modelname")
+        self._model_name = self.get_param_anon("system_info_modelname")
         return self._model_name
 
     @staticmethod
