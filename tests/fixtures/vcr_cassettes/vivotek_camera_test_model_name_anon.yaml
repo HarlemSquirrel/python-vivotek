@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://fake_ip.local/cgi-bin/anonymous/getparam.cgi?system_info_modelname
+  response:
+    body:
+      string: "system_info_modelname='IB8369A'\r\n"
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-control:
+      - no-cache
+      Connection:
+      - close
+      Content-length:
+      - '33'
+      Content-type:
+      - text/plain
+      Date:
+      - Wed, 23 Oct 2019 22:55:24 GMT
+      Pragma:
+      - no-cache
+      Server:
+      - Web Server
+    status:
+      code: 200
+      message: OK
+version: 1
