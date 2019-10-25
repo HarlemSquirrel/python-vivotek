@@ -11,10 +11,10 @@ API_PATHS = {
     "still": "/video.jpg",
 }
 SECURITY_LEVELS = {
-    0: "anonymous",
-    1: "viewer",
-    4: "operator",
-    6: "admin"
+    "anonymous":    0,
+    "viewer":       1,
+    "operator":     4,
+    "admin":        6
 }
 
 class VivotekCameraError(Exception):
@@ -25,7 +25,8 @@ class VivotekCamera():
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, host, port=None, usr=None, pwd=None, ssl=None, verify_ssl=True, sec_lvl=None):
+    def __init__(self, host, port=None, usr=None, pwd=None, ssl=None, verify_ssl=True,
+                 sec_lvl=None):
         """
         Initialize a camera.
         """
@@ -46,7 +47,7 @@ class VivotekCamera():
         else:
             self.verify_ssl = verify_ssl
 
-        if sec_lvl not in SECURITY_LEVELS.values():
+        if sec_lvl not in SECURITY_LEVELS.keys():
             raise VivotekCameraError("Invalid security level: %s" % sec_lvl)
 
         if usr is None or sec_lvl == 'anonymous':
@@ -105,6 +106,10 @@ class VivotekCamera():
 
     def set_param(self, param, value):
         """Set and return the value of the provided key."""
+        if SECURITY_LEVELS[self._security_level] < 4:
+            raise VivotekCameraError("Security level %s is too low to set parameters."
+                                     % self._security_level)
+
         try:
             response = requests.post(
                 self._set_param_url,

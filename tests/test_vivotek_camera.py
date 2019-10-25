@@ -82,6 +82,15 @@ class TestVivotekCamera(unittest.TestCase):
             with self.assertRaises(VivotekCameraError):
                 self.cam.set_param('bogus_param', 'some_value')
 
+    def test_set_param_security_level_too_low(self):
+        cam_args = TEST_CONNECTION_DETAILS.copy()
+        cam_args.update(sec_lvl='viewer')
+        self.cam = VivotekCamera(**cam_args)
+        error_msg="Security level viewer is too low to set parameters."
+        with self.assertRaises(VivotekCameraError, msg=error_msg):
+            self.assertTrue(self.cam.event_enabled('event_i0_enable'))
+
+
     def test_set_param_invalid_credentials(self):
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args.update(pwd='badpassword')
