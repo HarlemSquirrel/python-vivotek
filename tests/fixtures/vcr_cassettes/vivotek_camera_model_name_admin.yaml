@@ -6,12 +6,14 @@ interactions:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
+      Authorization:
+      - Basic dGVzdF91c2VyOnQzc3RfcEA1NXcwcmRa
       Connection:
       - keep-alive
       User-Agent:
       - python-requests/2.22.0
     method: GET
-    uri: https://fake_ip.local/cgi-bin/anonymous/getparam.cgi?system_info_modelname
+    uri: https://fake_ip.local/cgi-bin/admin/getparam.cgi?system_info_modelname
   response:
     body:
       string: "system_info_modelname='IB8369A'\r\n"
@@ -27,7 +29,7 @@ interactions:
       Content-type:
       - text/plain
       Date:
-      - Thu, 19 Sep 2019 23:14:29 GMT
+      - Wed, 23 Oct 2019 23:11:55 GMT
       Pragma:
       - no-cache
       Server:

@@ -17,13 +17,26 @@ pip3 install libpyvivotek
 pip3 install --user libpyvivotek
 ```
 
+### Usage
+
 ```py
 from libpyvivotek import VivotekCamera
 
-cam = VivotekCamera(host='192.168.1.123', port=443, usr='user', pwd='passw0rd')
+cam = VivotekCamera(host='192.168.1.123', port=443, usr='user', pwd='passw0rd',
+                    ssl=True, verify_ssl=True, sec_lvl='admin')
 print("Camera model is %s" % cam.model_name)
 # Camera model is IB8369A
 ```
+
+#### Security Level
+
+Four security levels are currently supported:
+- anonymous
+- viewer
+- operator
+- admin
+
+Using the `anonymous` security level does not require a user or password. The `operator` or `admin` security level is required to set parameters.
 
 ### Load password from Keyring
 

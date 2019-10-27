@@ -1,0 +1,46 @@
+interactions:
+- request:
+    body: event_i0_enable=1
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic dGVzdF91c2VyOnQzc3RfcEA1NXcwcmRa
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '17'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://fake_ip.local/cgi-bin/operator/setparam.cgi
+  response:
+    body:
+      string: 'ERROR: Invalid command!
+
+'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-control:
+      - no-cache
+      Connection:
+      - close
+      Content-length:
+      - '24'
+      Content-type:
+      - text/plain
+      Date:
+      - Fri, 25 Oct 2019 14:32:47 GMT
+      Pragma:
+      - no-cache
+      Server:
+      - Web Server
+    status:
+      code: 200
+      message: OK
+version: 1

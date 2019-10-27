@@ -3,11 +3,18 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 DEFAULT_EVENT_0_KEY = "event_i0_enable"
-DEFAULT_PATHS = {
-    "get": "/cgi-bin/admin/getparam.cgi",
-    "get_anon": "/cgi-bin/anonymous/getparam.cgi",
-    "set": "/cgi-bin/admin/setparam.cgi",
-    "still": "/cgi-bin/viewer/video.jpg",
+CGI_BASE_PATH = "/cgi-bin"
+API_PATHS = {
+    "get": "/getparam.cgi",
+    "get_anon": "/getparam.cgi",
+    "set": "/setparam.cgi",
+    "still": "/video.jpg",
+}
+SECURITY_LEVELS = {
+    "anonymous":    0,
+    "viewer":       1,
+    "operator":     4,
+    "admin":        6
 }
 
 class VivotekCameraError(Exception):
@@ -18,30 +25,49 @@ class VivotekCamera():
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, host, port, usr, pwd, ssl=None, verify_ssl=True):
+    def __init__(self, host, port=None, usr=None, pwd=None, ssl=None, verify_ssl=True,
+                 sec_lvl=None):
         """
         Initialize a camera.
         """
         self.host = host
-        self.port = port
-        self._requests_auth = HTTPBasicAuth(usr, pwd)
-        self._model_name = None
 
-        self.ssl = ssl
-        if port == 443 and ssl is None:
-            self.ssl = True
-        if self.ssl is None:
-            self.ssl = False
-        if self.ssl is None or self.ssl is False:
+        if port is None:
+            self._port = 443 if ssl else 80
+        else:
+            self._port = port
+
+        if ssl or (self._port == 443 and ssl is None):
+            self._ssl = True
+        else:
+            self._ssl = False
+
+        if self._ssl is False:
             self.verify_ssl = False
         else:
             self.verify_ssl = verify_ssl
 
-        _protocol = 'https' if self.ssl else 'http'
-        self._get_param_url = _protocol + "://" + self.host + DEFAULT_PATHS["get"]
-        self._get_anon_param_url = _protocol + "://" + self.host + DEFAULT_PATHS["get_anon"]
-        self._set_param_url = _protocol + "://" + self.host + DEFAULT_PATHS["set"]
-        self._still_image_url = _protocol + "://" + self.host + DEFAULT_PATHS["still"]
+        if sec_lvl not in SECURITY_LEVELS.keys():
+            raise VivotekCameraError("Invalid security level: %s" % sec_lvl)
+
+        if usr is None or sec_lvl == 'anonymous':
+            self._requests_auth = None
+            self._security_level = 'anonymous'
+        else:
+            self._requests_auth = HTTPBasicAuth(usr, pwd)
+            self._security_level = sec_lvl
+
+        self._model_name = None
+
+        _protocol = 'https' if self._ssl else 'http'
+        self._url_base = _protocol + "://" + self.host
+        if (ssl is None and port != 80) or (ssl and port != 443):
+            self._url_base += ":" + str(self._port)
+        self._cgi_url_base = self._url_base + CGI_BASE_PATH + "/" + self._security_level
+
+        self._get_param_url = self._cgi_url_base + API_PATHS["get"]
+        self._set_param_url = self._cgi_url_base + API_PATHS["set"]
+        self._still_image_url = self._cgi_url_base + API_PATHS["still"]
 
     def event_enabled(self, event_key):
         """Return true if event for the provided key is enabled."""
@@ -64,28 +90,15 @@ class VivotekCamera():
 
     def get_param(self, param):
         """Return the value of the provided key."""
+        request_args = dict(
+            params=(param),
+            timeout=10,
+            verify=self.verify_ssl
+        )
+        if self._requests_auth is not None:
+            request_args['auth'] = self._requests_auth
         try:
-            response = requests.get(
-                self._get_param_url,
-                auth=self._requests_auth,
-                params=(param),
-                timeout=10,
-                verify=self.verify_ssl,
-            )
-
-            return self.__parse_response_value(response)
-        except requests.exceptions.RequestException as error:
-            raise VivotekCameraError(error)
-
-    def get_param_anon(self, param):
-        """Retrieve anonymously and return the value of the provided key."""
-        try:
-            response = requests.get(
-                self._get_anon_param_url,
-                params=(param),
-                timeout=10,
-                verify=self.verify_ssl,
-            )
+            response = requests.get(self._get_param_url, **request_args)
 
             return self.__parse_response_value(response)
         except requests.exceptions.RequestException as error:
@@ -93,6 +106,10 @@ class VivotekCamera():
 
     def set_param(self, param, value):
         """Set and return the value of the provided key."""
+        if SECURITY_LEVELS[self._security_level] < 4:
+            raise VivotekCameraError("Security level %s is too low to set parameters."
+                                     % self._security_level)
+
         try:
             response = requests.post(
                 self._set_param_url,
@@ -112,7 +129,7 @@ class VivotekCamera():
         if self._model_name is not None:
             return self._model_name
 
-        self._model_name = self.get_param_anon("system_info_modelname")
+        self._model_name = self.get_param("system_info_modelname")
         return self._model_name
 
     @staticmethod
