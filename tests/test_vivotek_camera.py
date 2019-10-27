@@ -20,7 +20,7 @@ class TestVivotekCamera(unittest.TestCase):
         """
         Return the cassette file path based on the name of the function that called this function
         """
-        return "tests/fixtures/vcr_cassettes/vivotek_camera_%s.yaml" % inspect.stack()[1][3]
+        return "tests/fixtures/vcr_cassettes/vivotek_camera_%s.yaml" % inspect.stack()[1][3][5:]
 
     def setUp(self):
         self.cam = VivotekCamera(**TEST_CONNECTION_DETAILS)
@@ -35,7 +35,7 @@ class TestVivotekCamera(unittest.TestCase):
     # Getting parameters
     # ------------------
     def test_get_param_error(self):
-        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_get_param_error.yaml'):
+        with vcr.use_cassette(self.cassette_file_path()):
             with self.assertRaises(VivotekCameraError):
                 self.cam.get_param('bogus_param')
 
@@ -45,16 +45,16 @@ class TestVivotekCamera(unittest.TestCase):
         self.cam = VivotekCamera(**cam_args)
         error_msg = 'Unauthorized. Credentials may be invalid.'
 
-        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_get_param_invalid_credentials.yaml'):
+        with vcr.use_cassette(self.cassette_file_path()):
             with self.assertRaises(VivotekCameraError, msg=error_msg):
                 self.cam.get_param('capability_api_httpversion')
 
     def test_event_enabled_false(self):
-        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_event_enabled_false.yaml'):
+        with vcr.use_cassette(self.cassette_file_path()):
             self.assertFalse(self.cam.event_enabled('event_i0_enable'))
 
     def test_event_enabled_true(self):
-        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_event_enabled_true.yaml'):
+        with vcr.use_cassette(self.cassette_file_path()):
             self.assertTrue(self.cam.event_enabled('event_i0_enable'))
 
     def test_model_name_admin(self):
@@ -78,7 +78,7 @@ class TestVivotekCamera(unittest.TestCase):
     # Setting parameters
     # ------------------
     def test_set_param_error(self):
-        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_error.yaml'):
+        with vcr.use_cassette(self.cassette_file_path()):
             with self.assertRaises(VivotekCameraError):
                 self.cam.set_param('bogus_param', 'some_value')
 
@@ -97,19 +97,28 @@ class TestVivotekCamera(unittest.TestCase):
         self.cam = VivotekCamera(**cam_args)
         error_msg = 'Unauthorized. Credentials may be invalid.'
 
-        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_invalid_credentials.yaml'):
+        with vcr.use_cassette(self.cassette_file_path()):
             with self.assertRaises(VivotekCameraError, msg=error_msg):
                 self.cam.set_param('event_i0_enable', 0)
 
     def test_set_param_enable_event(self):
-        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_enable_event.yaml'):
+        with vcr.use_cassette(self.cassette_file_path()):
             self.assertEqual(self.cam.set_param('event_i0_enable', 1), "1")
             self.assertTrue(self.cam.event_enabled('event_i0_enable'))
 
     def test_set_param_disable_event(self):
-        with vcr.use_cassette('tests/fixtures/vcr_cassettes/vivotek_camera_set_param_disable_event.yaml'):
+        with vcr.use_cassette(self.cassette_file_path()):
             self.assertEqual(self.cam.set_param('event_i0_enable', 0), "0")
             self.assertFalse(self.cam.event_enabled('event_i0_enable'))
+
+    def test_set_param_enable_event_operator(self):
+        cam_args = TEST_CONNECTION_DETAILS.copy()
+        cam_args.update(sec_lvl='operator')
+        self.cam = VivotekCamera(**cam_args)
+        error_msg = 'ERROR: Invalid command!'
+        with vcr.use_cassette(self.cassette_file_path()):
+            with self.assertRaises(VivotekCameraError, msg=error_msg):
+                self.cam.set_param('event_i0_enable', 1)
 
 
 if __name__ == '__main__':
