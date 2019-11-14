@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic dGVzdF91c2VyOnQzc3RfcEA1NXcwcmRa
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://fake_ip.local/cgi-bin/viewer/video.jpg?quality=3
+  response:
+    body:
+      string: !!binary |
+        /9j/4gBeRk1fUEcgTW9kZQIKRnJvbnQgZG9vcgFEAAIpkWpwZWcAACIRzF3FLwEBrAyAAAAAAAAA
+        ABAMAAAAAAAAAAAAAAAAoMiQgmu2YbnU4JUAkgVKHPcA/9k=
+    headers:
+      Content-Length:
+      - '294254'
+      Content-type:
+      - image/jpeg
+    status:
+      code: 200
+      message: OK
+version: 1

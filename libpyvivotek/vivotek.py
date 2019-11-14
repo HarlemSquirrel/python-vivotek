@@ -66,18 +66,19 @@ class VivotekCamera():
 
         self._get_param_url = self._cgi_url_base + API_PATHS["get"]
         self._set_param_url = self._cgi_url_base + API_PATHS["set"]
-        self._still_image_url = self._cgi_url_base + API_PATHS["still"]
+        self._still_image_url = self._url_base + CGI_BASE_PATH + "/viewer" + API_PATHS["still"]
 
     def event_enabled(self, event_key):
         """Return true if event for the provided key is enabled."""
         response = self.get_param(event_key)
         return int(response.replace("'", "")) == 1
 
-    def snapshot(self):
+    def snapshot(self, quality=3):
         """Return the bytes of current still image."""
         try:
             response = requests.get(
                 self._still_image_url,
+                params=dict(quality=quality),
                 auth=self._requests_auth,
                 timeout=10,
                 verify=self.verify_ssl,

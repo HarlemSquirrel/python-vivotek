@@ -32,6 +32,10 @@ class TestVivotekCamera(unittest.TestCase):
         with self.assertRaises(VivotekCameraError, msg=error_msg):
             cam = VivotekCamera(**cam_args)
 
+    def test_snapshot(self):
+        with vcr.use_cassette(self.cassette_file_path()):
+            self.assertIsInstance(self.cam.snapshot(), bytes)
+
     # Getting parameters
     # ------------------
     def test_get_param_error(self):
