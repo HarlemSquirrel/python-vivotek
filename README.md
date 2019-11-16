@@ -62,6 +62,8 @@ print("Camera model is %s" % cam.model_name)
 
 ### View a snapshot image
 
+We can optionally specify the image quality to `snapshot()` from 1 to 5 with a default of 3.
+
 ```py
 from libpyvivotek import VivotekCamera
 from PIL import Image
@@ -70,7 +72,9 @@ import keyring
 
 cam = VivotekCamera(host='192.168.1.123', port=443, usr='user',
                     pwd=keyring.get_password('camera', 'user'))
-snapshot = Image.open(BytesIO(cam.snapshot()))
+
+snapshot = Image.open(BytesIO(cam.snapshot(quality=3)))
+
 snapshot.show()
 ```
 
