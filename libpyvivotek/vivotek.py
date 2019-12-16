@@ -1,6 +1,7 @@
 """A python implementation of the Vivotek IB8369A"""
 import requests
 from requests.auth import HTTPBasicAuth
+from requests.auth import HTTPDigestAuth
 
 DEFAULT_EVENT_0_KEY = "event_i0_enable"
 CGI_BASE_PATH = "/cgi-bin"
@@ -25,7 +26,8 @@ class VivotekCamera():
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, host, sec_lvl, port=None, usr=None, pwd=None, ssl=None, verify_ssl=True):
+    def __init__(self, host, sec_lvl, port=None, usr=None, pwd=None, digest_auth=False, ssl=None,
+                 verify_ssl=True):
         """
         Initialize a camera.
         """
@@ -53,8 +55,11 @@ class VivotekCamera():
             self._requests_auth = None
             self._security_level = 'anonymous'
         else:
-            self._requests_auth = HTTPBasicAuth(usr, pwd)
             self._security_level = sec_lvl
+            if digest_auth:
+                self._requests_auth = HTTPDigestAuth(usr, pwd)
+            else:
+                self._requests_auth = HTTPBasicAuth(usr, pwd)
 
         self._model_name = None
 
