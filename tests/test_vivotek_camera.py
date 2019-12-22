@@ -5,6 +5,9 @@ import vcr
 from libpyvivotek.vivotek import VivotekCamera, VivotekCameraError
 
 TEST_CONNECTION_DETAILS = dict(
+    # host ='192.168.1.119',
+    # usr = 'root',
+    # pwd = 'BCj21Xfy41pVp9PZ@!',
     host ='fake_ip.local',
     usr = 'test_user',
     pwd = 't3st_p@55w0rdZ',
@@ -68,6 +71,13 @@ class TestVivotekCamera(unittest.TestCase):
     def test_model_name_viewer(self):
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args.update(sec_lvl='viewer')
+        self.cam = VivotekCamera(**cam_args)
+        with vcr.use_cassette(self.cassette_file_path()):
+            self.assertEqual(self.cam.model_name, 'IB8369A')
+
+    def test_model_name_viewer_digest(self):
+        cam_args = TEST_CONNECTION_DETAILS.copy()
+        cam_args.update(sec_lvl='viewer', digest_auth=True)
         self.cam = VivotekCamera(**cam_args)
         with vcr.use_cassette(self.cassette_file_path()):
             self.assertEqual(self.cam.model_name, 'IB8369A')

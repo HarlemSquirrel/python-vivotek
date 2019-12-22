@@ -23,7 +23,7 @@ pip3 install --user libpyvivotek
 from libpyvivotek import VivotekCamera
 
 cam = VivotekCamera(host='192.168.1.123', port=443, usr='user', pwd='passw0rd',
-                    ssl=True, verify_ssl=True, sec_lvl='admin')
+                    digest_auth=True, ssl=True, verify_ssl=True, sec_lvl='admin')
 print("Camera model is %s" % cam.model_name)
 # Camera model is IB8369A
 ```
