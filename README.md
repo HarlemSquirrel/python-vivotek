@@ -8,7 +8,7 @@ A Python library for Vivotek IP cameras.
 
 ### Install
 
-This library currently supports Python 3.4 and up.
+This library currently supports Python 3.5 and up.
 
 ```sh
 pip3 install libpyvivotek
