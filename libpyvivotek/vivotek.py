@@ -91,7 +91,7 @@ class VivotekCamera():
 
             return response.content
         except requests.exceptions.RequestException as error:
-            raise VivotekCameraError(error)
+            raise VivotekCameraError from error
 
     def get_param(self, param):
         """Return the value of the provided key."""
@@ -107,7 +107,7 @@ class VivotekCamera():
 
             return self.__parse_response_value(response)
         except requests.exceptions.RequestException as error:
-            raise VivotekCameraError(error)
+            raise VivotekCameraError from error
 
     def set_param(self, param, value):
         """Set and return the value of the provided key."""
@@ -126,7 +126,7 @@ class VivotekCamera():
 
             return self.__parse_response_value(response)
         except requests.exceptions.RequestException as error:
-            raise VivotekCameraError(error)
+            raise VivotekCameraError from error
 
     @property
     def model_name(self):
