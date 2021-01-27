@@ -21,7 +21,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.4',
+    python_requires='>=3.5',
     keywords=['vivotek', 'Camera', 'IPC'],
     test_suite="tests",
 )
