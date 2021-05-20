@@ -39,7 +39,7 @@ class VivotekCamera():
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, netloc:str, security_level='anonymous', user=None, password=None, digest_auth=False, ssl=None,
+    def __init__(self, netloc:str, security_level='anonymous', username=None, password=None, digest_auth=False, ssl=None,
                  verify_ssl=True):
         """
         Initialize a camera.
@@ -56,15 +56,15 @@ class VivotekCamera():
         if security_level not in SECURITY_LEVELS.keys():
             raise VivotekCameraError("Invalid security level: %s" % security_level)
 
-        if user is None or security_level == 'anonymous':
+        if username is None or security_level == 'anonymous':
             self._requests_auth = None
             self._security_level = 'anonymous'
         else:
             self._security_level = security_level
             if digest_auth:
-                self._requests_auth = HTTPDigestAuth(user, password)
+                self._requests_auth = HTTPDigestAuth(username, password)
             else:
-                self._requests_auth = HTTPBasicAuth(user, password)
+                self._requests_auth = HTTPBasicAuth(username, password)
 
         self._model_name = None
 
