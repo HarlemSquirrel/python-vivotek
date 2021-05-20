@@ -86,9 +86,47 @@ class VivotekCamera():
         self._set_param_url = self._cgi_url_base + API_PATHS["set"]
         self._still_image_url = self._url_base + CGI_BASE_PATH + "/viewer" + API_PATHS["still"]
 
+        class VivotekCameraParameters:
+            def __getitem__(_, param):
+                """Return the value of the provided key."""
+                request_args = dict(
+                    params=(param),
+                    timeout=10,
+                    verify=self.verify_ssl
+                )
+                if self._requests_auth is not None:
+                    request_args['auth'] = self._requests_auth
+                try:
+                    response = requests.get(self._get_param_url, **request_args)
+
+                    return parse_response_value(response)
+                except requests.exceptions.RequestException as error:
+                    raise VivotekCameraError from error
+
+            def __setitem__(_, param, value):
+                """Set and return the value of the provided key."""
+                if SECURITY_LEVELS[self._security_level] < 4:
+                    raise VivotekCameraError("Security level %s is too low to set parameters."
+                                            % self._security_level)
+
+                try:
+                    response = requests.post(
+                        self._set_param_url,
+                        auth=self._requests_auth,
+                        data={param: value},
+                        timeout=10,
+                        verify=self.verify_ssl,
+                    )
+
+                    return parse_response_value(response)
+                except requests.exceptions.RequestException as error:
+                    raise VivotekCameraError from error
+        
+        self.params = VivotekCameraParameters()
+
     def event_enabled(self, event_key):
         """Return true if event for the provided key is enabled."""
-        response = self.get_param(event_key)
+        response = self.params[event_key]
         return int(response.replace("'", "")) == 1
 
     def snapshot(self, quality=3):
@@ -106,46 +144,11 @@ class VivotekCamera():
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
 
-    def get_param(self, param):
-        """Return the value of the provided key."""
-        request_args = dict(
-            params=(param),
-            timeout=10,
-            verify=self.verify_ssl
-        )
-        if self._requests_auth is not None:
-            request_args['auth'] = self._requests_auth
-        try:
-            response = requests.get(self._get_param_url, **request_args)
-
-            return parse_response_value(response)
-        except requests.exceptions.RequestException as error:
-            raise VivotekCameraError from error
-
-    def set_param(self, param, value):
-        """Set and return the value of the provided key."""
-        if SECURITY_LEVELS[self._security_level] < 4:
-            raise VivotekCameraError("Security level %s is too low to set parameters."
-                                     % self._security_level)
-
-        try:
-            response = requests.post(
-                self._set_param_url,
-                auth=self._requests_auth,
-                data={param: value},
-                timeout=10,
-                verify=self.verify_ssl,
-            )
-
-            return parse_response_value(response)
-        except requests.exceptions.RequestException as error:
-            raise VivotekCameraError from error
-
     @property
     def model_name(self):
         """Return the model name of the camera."""
         if self._model_name is not None:
             return self._model_name
 
-        self._model_name = self.get_param("system_info_modelname")
+        self._model_name = self.params["system_info_modelname"]
         return self._model_name
