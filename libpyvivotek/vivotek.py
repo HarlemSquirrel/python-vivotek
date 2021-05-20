@@ -18,7 +18,7 @@ SECURITY_LEVELS = {
     "admin":        6
 }
 
-def parse_response_value(response):
+def parse_response_value(response:requests.Response):
     """
     Parse the response from an API call and return the value only.
     This assumes the response is in the key='value' format.
