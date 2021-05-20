@@ -2,6 +2,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
+from urllib.parse import urlunparse
 
 DEFAULT_EVENT_0_KEY = "event_i0_enable"
 CGI_BASE_PATH = "/cgi-bin"
@@ -68,8 +69,8 @@ class VivotekCamera():
 
         self._model_name = None
 
-        _protocol = 'https' if self._ssl else 'http'
-        self._url_base = _protocol + "://" + self.netloc
+        scheme = 'https' if self._ssl else 'http'
+        self._url_base = scheme + "://" + self.netloc
 
         self._cgi_url_base = self._url_base + CGI_BASE_PATH + "/" + self._security_level
 
