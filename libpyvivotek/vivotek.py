@@ -39,22 +39,14 @@ class VivotekCamera():
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, host, security_level='anonymous', port=None, user=None, password=None, digest_auth=False, ssl=None,
+    def __init__(self, netloc:str, security_level='anonymous', user=None, password=None, digest_auth=False, ssl=None,
                  verify_ssl=True):
         """
         Initialize a camera.
         """
-        self.host = host
+        self.netloc = netloc
 
-        if port is None:
-            self._port = 443 if ssl else 80
-        else:
-            self._port = port
-
-        if ssl or (self._port == 443 and ssl is None):
-            self._ssl = True
-        else:
-            self._ssl = False
+        self._ssl = bool(ssl)
 
         if self._ssl is False:
             self.verify_ssl = False
@@ -77,9 +69,8 @@ class VivotekCamera():
         self._model_name = None
 
         _protocol = 'https' if self._ssl else 'http'
-        self._url_base = _protocol + "://" + self.host
-        if (ssl is None and port != 80) or (ssl and port != 443):
-            self._url_base += ":" + str(self._port)
+        self._url_base = _protocol + "://" + self.netloc
+
         self._cgi_url_base = self._url_base + CGI_BASE_PATH + "/" + self._security_level
 
         self._get_param_url = self._cgi_url_base + API_PATHS["get"]
