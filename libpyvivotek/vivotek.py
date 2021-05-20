@@ -87,10 +87,10 @@ class VivotekCamera():
         self._still_image_url = self._url_base + CGI_BASE_PATH + "/viewer" + API_PATHS["still"]
 
         class VivotekCameraParameters:
-            def __getitem__(_, param):
+            def __getitem__(_, key):
                 """Return the value of the provided key."""
                 request_args = dict(
-                    params=(param),
+                    params=(key),
                     timeout=10,
                     verify=self.verify_ssl
                 )
@@ -103,7 +103,7 @@ class VivotekCamera():
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
 
-            def __setitem__(_, param, value):
+            def __setitem__(_, key, value):
                 """Set and return the value of the provided key."""
                 if SECURITY_LEVELS[self._security_level] < 4:
                     raise VivotekCameraError("Security level %s is too low to set parameters."
@@ -113,7 +113,7 @@ class VivotekCamera():
                     response = requests.post(
                         self._set_param_url,
                         auth=self._requests_auth,
-                        data={param: value},
+                        data={key: value},
                         timeout=10,
                         verify=self.verify_ssl,
                     )
