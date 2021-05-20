@@ -39,7 +39,7 @@ class VivotekCamera():
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, host, security_level, port=None, user=None, password=None, digest_auth=False, ssl=None,
+    def __init__(self, host, security_level='anonymous', port=None, user=None, password=None, digest_auth=False, ssl=None,
                  verify_ssl=True):
         """
         Initialize a camera.
