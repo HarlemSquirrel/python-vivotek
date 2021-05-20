@@ -18,6 +18,19 @@ SECURITY_LEVELS = {
     "admin":        6
 }
 
+def parse_response_value(response):
+    """
+    Parse the response from an API call and return the value only.
+    This assumes the response is in the key='value' format.
+    An error will be raised when ERROR is found in the body of the response.
+    """
+    if 'ERROR' in response.text:
+        raise VivotekCameraError(response.text)
+    if response.status_code == 401:
+        raise VivotekCameraError('Unauthorized. Credentials may be invalid.')
+
+    return response.text.strip().split('=')[1].replace("'", "")
+
 class VivotekCameraError(Exception):
     """Custom Error class for VivotekCamera"""
 
@@ -105,7 +118,7 @@ class VivotekCamera():
         try:
             response = requests.get(self._get_param_url, **request_args)
 
-            return self.__parse_response_value(response)
+            return parse_response_value(response)
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
 
@@ -124,7 +137,7 @@ class VivotekCamera():
                 verify=self.verify_ssl,
             )
 
-            return self.__parse_response_value(response)
+            return parse_response_value(response)
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
 
@@ -136,17 +149,3 @@ class VivotekCamera():
 
         self._model_name = self.get_param("system_info_modelname")
         return self._model_name
-
-    @staticmethod
-    def __parse_response_value(response):
-        """
-        Parse the response from an API call and return the value only.
-        This assumes the response is in the key='value' format.
-        An error will be raised when ERROR is found in the body of the response.
-        """
-        if 'ERROR' in response.text:
-            raise VivotekCameraError(response.text)
-        if response.status_code == 401:
-            raise VivotekCameraError('Unauthorized. Credentials may be invalid.')
-
-        return response.text.strip().split('=')[1].replace("'", "")
