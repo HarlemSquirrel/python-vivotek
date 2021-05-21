@@ -138,6 +138,29 @@ class VivotekCamera():
                     return parse_response_value(response)
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
+
+            def items(_):
+                request_args = dict(
+                    timeout=10,
+                    verify=self.verify_ssl
+                )
+
+                if self._requests_auth is not None:
+                    request_args['auth'] = self._requests_auth
+                
+                try:
+                    response = requests.get(self._get_param_url, **request_args)
+                    param_entry_lines = response.text.strip().splitlines()
+
+                    for line in param_entry_lines:
+                        yield parse_parameter_entry(line)
+                    
+                except requests.exceptions.RequestException as error:
+                    raise VivotekCameraError from error
+            
+            def __iter__(self):
+                for key, _ in self.items():
+                    yield key
         
         self.params = VivotekCameraParameters()
 
