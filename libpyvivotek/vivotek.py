@@ -2,15 +2,29 @@
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
+
+from posixpath import join as joinurlpath
 from urllib.parse import urlunparse
 
+def geturl(scheme:str, netloc:str, *path_parts:str):
+    components = [
+        scheme,
+        netloc,
+        joinurlpath(*path_parts),
+        '',
+        '',
+        ''
+    ]
+
+    return urlunparse(components)
+
 DEFAULT_EVENT_0_KEY = "event_i0_enable"
-CGI_BASE_PATH = "/cgi-bin"
+CGI_BASE_PATH = "cgi-bin"
 API_PATHS = {
-    "get": "/getparam.cgi",
-    "get_anon": "/getparam.cgi",
-    "set": "/setparam.cgi",
-    "still": "/video.jpg",
+    "get": "getparam.cgi",
+    "get_anon": "getparam.cgi",
+    "set": "setparam.cgi",
+    "still": "video.jpg",
 }
 SECURITY_LEVELS = {
     "anonymous":    0,
@@ -70,13 +84,12 @@ class VivotekCamera():
         self._model_name = None
 
         scheme = 'https' if self._ssl else 'http'
-        self._url_base = scheme + "://" + self.netloc
 
-        self._cgi_url_base = self._url_base + CGI_BASE_PATH + "/" + self._security_level
+        self._cgi_base_path = joinurlpath(CGI_BASE_PATH, self._security_level)
 
-        self._get_param_url = self._cgi_url_base + API_PATHS["get"]
-        self._set_param_url = self._cgi_url_base + API_PATHS["set"]
-        self._still_image_url = self._url_base + CGI_BASE_PATH + "/viewer" + API_PATHS["still"]
+        self._get_param_url = geturl(scheme, netloc, self._cgi_base_path, API_PATHS["get"])
+        self._set_param_url = geturl(scheme, netloc, self._cgi_base_path, API_PATHS["set"])
+        self._still_image_url = geturl(scheme, netloc, CGI_BASE_PATH, "viewer", API_PATHS["still"])
 
         class VivotekCameraParameters:
             def __getitem__(_, key):
