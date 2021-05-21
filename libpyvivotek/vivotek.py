@@ -33,6 +33,16 @@ SECURITY_LEVELS = {
     "admin":        6
 }
 
+def parse_parameter_entry(entry:str) -> tuple:
+    entry = entry.strip()
+
+    equalsindex = entry.index('=')
+
+    key = entry[0:equalsindex]
+    value = entry[equalsindex+2:-1]
+
+    return key, value
+
 def parse_response_value(response:requests.Response) -> str:
     """
     Parse the response from an API call and return the value only.
@@ -44,7 +54,9 @@ def parse_response_value(response:requests.Response) -> str:
     if response.status_code == 401:
         raise VivotekCameraError('Unauthorized. Credentials may be invalid.')
 
-    return response.text.strip().split('=')[1].replace("'", "")
+    _, value = parse_parameter_entry(response.text)
+
+    return value
 
 class VivotekCameraError(Exception):
     """Custom Error class for VivotekCamera"""
