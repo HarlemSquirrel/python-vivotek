@@ -122,7 +122,7 @@ class VivotekCamera():
 
             def __setitem__(_, key, value):
                 """Set and return the value of the provided key."""
-                if SECURITY_LEVELS[self._security_level] < 4:
+                if SECURITY_LEVELS[self._security_level] < SECURITY_LEVELS["operator"]:
                     raise VivotekCameraError("Security level %s is too low to set parameters."
                                             % self._security_level)
 
