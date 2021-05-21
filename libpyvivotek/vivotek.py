@@ -4,7 +4,7 @@ from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
 
 from posixpath import join as joinurlpath
-from urllib.parse import urlunparse
+from urllib.parse import urlunparse, quote_plus
 
 def geturl(scheme:str, netloc:str, *path_parts:str):
     components = [
@@ -139,8 +139,12 @@ class VivotekCamera():
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
 
-            def items(_):
+            def items(_, *params:str):
+                urlsafe_params = [quote_plus(param) for param in params]
+                parsed_params = '&'.join(urlsafe_params)
+
                 request_args = dict(
+                    params=parsed_params,
                     timeout=10,
                     verify=self.verify_ssl
                 )
