@@ -104,21 +104,12 @@ class VivotekCamera():
         self._still_image_url = geturl(scheme, netloc, CGI_BASE_PATH, "viewer", API_PATHS["still"])
 
         class VivotekCameraParameters:
-            def __getitem__(_, key):
+            def __getitem__(self, key):
                 """Return the value of the provided key."""
-                request_args = dict(
-                    params=(key),
-                    timeout=10,
-                    verify=self.verify_ssl
-                )
-                if self._requests_auth is not None:
-                    request_args['auth'] = self._requests_auth
                 try:
-                    response = requests.get(self._get_param_url, **request_args)
-
-                    return parse_response_value(response)
-                except requests.exceptions.RequestException as error:
-                    raise VivotekCameraError from error
+                    return next(self.items(key))[1]
+                except StopIteration as eof:
+                    raise KeyError(key) from eof 
 
             def __setitem__(_, key, value):
                 """Set and return the value of the provided key."""
