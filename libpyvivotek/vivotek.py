@@ -159,10 +159,56 @@ class VivotekCamera():
         
         self.params = VivotekCameraParameters()
 
-    def event_enabled(self, event_key):
-        """Return true if event for the provided key is enabled."""
-        response = self.params[event_key]
-        return int(response.replace("'", "")) == 1
+        class VivotekCameraEvent:
+            __prefix:str
+
+            def __init__(event, prefix:str):
+                event.__prefix = prefix
+
+                class EnabledEventParameters:
+                    def __contains__(_, key:str) -> bool:
+                        try:
+                            return int(event[key]) == 1
+                        except (KeyError, ValueError):
+                            return False
+                
+                event.enabled = EnabledEventParameters()
+
+            def __getitem__(event, key:str):
+                try:
+                    return self.params[event.__prefix + key]
+                except KeyError as knf:
+                    raise KeyError(key) from knf
+            
+            def __setitem__(event, key:str, value):
+                self.params[event.__prefix + key] = value
+            
+            def __iter__(event):
+                prefix_length = len(event.__prefix)
+
+                for key, _ in self.params.items(event.__prefix.strip('_')):
+                    yield key[prefix_length:]
+
+        class VivotekCameraEvents:
+            def __getitem__(_, index:int) -> VivotekCameraEvent:
+                try:
+                    prefix = f"event_i{index}_"
+                    next(self.params.items(prefix.strip('_')))
+
+                    return VivotekCameraEvent(prefix)
+                except StopIteration as eof:
+                    raise KeyError(index) from eof
+            
+            def __iter__(events):
+                index = 0
+                
+                try:
+                    yield events[index]
+                    index += 1
+                except KeyError:
+                    return
+        
+        self.events = VivotekCameraEvents()
 
     def snapshot(self, quality=3):
         """Return the bytes of current still image."""
