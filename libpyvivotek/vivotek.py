@@ -103,7 +103,7 @@ class VivotekCamera():
         self._set_param_url = geturl(scheme, netloc, self._cgi_base_path, API_PATHS["set"])
         self._still_image_url = geturl(scheme, netloc, CGI_BASE_PATH, "viewer", API_PATHS["still"])
 
-        class VivotekCameraParameters:
+        class Parameters:
             def __getitem__(self, key):
                 """Return the value of the provided key."""
                 try:
@@ -157,9 +157,9 @@ class VivotekCamera():
                 for key, _ in self.items():
                     yield key
         
-        self.params = VivotekCameraParameters()
+        self.params = Parameters()
 
-        class VivotekCameraEvent:
+        class Event:
             __prefix:str
 
             def __init__(event, prefix:str):
@@ -189,13 +189,13 @@ class VivotekCamera():
                 for key, _ in self.params.items(event.__prefix.strip('_')):
                     yield key[prefix_length:]
 
-        class VivotekCameraEvents:
-            def __getitem__(_, index:int) -> VivotekCameraEvent:
+        class Events:
+            def __getitem__(_, index:int) -> Event:
                 try:
                     prefix = f"event_i{index}_"
                     next(self.params.items(prefix.strip('_')))
 
-                    return VivotekCameraEvent(prefix)
+                    return Event(prefix)
                 except StopIteration as eof:
                     raise KeyError(index) from eof
             
@@ -208,7 +208,7 @@ class VivotekCamera():
                 except KeyError:
                     return
         
-        self.events = VivotekCameraEvents()
+        self.events = Events()
 
     def snapshot(self, quality=3):
         """Return the bytes of current still image."""
