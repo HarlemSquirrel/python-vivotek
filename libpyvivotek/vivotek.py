@@ -226,7 +226,7 @@ class VivotekCamera():
             raise VivotekCameraError from error
 
     @property
-    def model_name(self):
+    def model(self):
         """Return the model name of the camera."""
         if self._model_name is not None:
             return self._model_name
