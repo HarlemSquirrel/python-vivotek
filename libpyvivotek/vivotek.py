@@ -25,6 +25,7 @@ API_PATHS = {
     "get_anon": "getparam.cgi",
     "set": "setparam.cgi",
     "still": "video.jpg",
+    "focus": "remotefocus.cgi"
 }
 SECURITY_LEVELS = {
     "anonymous":    0,
@@ -102,6 +103,7 @@ class VivotekCamera():
         self._get_param_url = geturl(scheme, netloc, self._cgi_base_path, API_PATHS["get"])
         self._set_param_url = geturl(scheme, netloc, self._cgi_base_path, API_PATHS["set"])
         self._still_image_url = geturl(scheme, netloc, CGI_BASE_PATH, "viewer", API_PATHS["still"])
+        self._remotefocus_url = geturl(scheme, netloc, self._cgi_base_path, API_PATHS["focus"])
 
         class Parameters:
             def __getitem__(self, key):
@@ -209,6 +211,85 @@ class VivotekCamera():
                     return
         
         self.events = Events()
+
+        class Motor:
+            __prefix:str
+            __function:str
+
+            def __init__(prop, __prefix, __function):
+                prop.__prefix = __prefix
+                prop.__function = __function
+            
+            @property
+            def __status(prop) -> dict:
+                request_args = dict(
+                    params=dict(function="getstatus"),
+                    timeout=10,
+                    verify=self.verify_ssl
+                )
+
+                if self._requests_auth is not None:
+                    request_args['auth'] = self._requests_auth
+                
+                try:
+                    response = requests.get(self._remotefocus_url, **request_args)
+                    param_entry_lines = response.text.strip().splitlines()
+
+                    return dict(parse_parameter_entry(line) for line in param_entry_lines)
+                except requests.exceptions.RequestException as error:
+                    raise VivotekCameraError from error
+
+            @property
+            def motor_max(prop) -> int:
+                return int(prop.__status[prop.__prefix + "motor_max"])
+            
+            @property
+            def motor_start(prop) -> int:
+                return int(prop.__status[prop.__prefix + "motor_start"])
+                
+            @property
+            def motor_end(prop) -> int:
+                return int(prop.__status[prop.__prefix + "motor_end"])
+            
+            @property
+            def motor(prop) -> int:
+                return int(prop.__status[prop.__prefix + "motor"])
+            
+            @motor.setter
+            def motor(prop, __position:int):
+                stats = prop.__status
+
+                __position = int(__position)
+
+                motor_start = int(stats[prop.__prefix + "motor_start"])
+                motor_end = int(stats[prop.__prefix + "motor_end"])
+
+                if (__position > motor_end) or (__position < motor_start):
+                    raise IndexError(__position)
+                
+                request_args = dict(
+                    params=dict(function=prop.__function, position=__position, direction="direct"),
+                    timeout=10,
+                    verify=self.verify_ssl
+                )
+
+                if self._requests_auth is not None:
+                    request_args['auth'] = self._requests_auth
+                
+                try:
+                    requests.get(self._remotefocus_url, **request_args)
+                except requests.exceptions.RequestException as error:
+                    raise VivotekCameraError from error
+
+            @property
+            def enable(prop) -> bool:
+                try:
+                    return int(prop.__status[prop.__prefix + "enable"]) == 1
+                except ValueError:
+                    return False
+        
+        self.focus = Motor("remote_focus_focus_", "focus")
+        self.zoom = Motor("remote_focus_zoom_", "zoom")
 
     def snapshot(self, quality=3):
         """Return the bytes of current still image."""
