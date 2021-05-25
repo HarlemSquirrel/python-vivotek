@@ -244,7 +244,13 @@ class VivotekCamera():
                     response = requests.get(self._remotefocus_url, **request_args)
                     param_entry_lines = response.text.strip().splitlines()
 
-                    return dict(parse_parameter_entry(line) for line in param_entry_lines if line is not None)
+                    def parse_entries():
+                        for line in param_entry_lines:
+                            parsed_entry = parse_parameter_entry(line)
+                            if parsed_entry is not None:
+                                yield parsed_entry
+
+                    return dict(parse_entries())
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
 
