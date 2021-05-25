@@ -128,13 +128,15 @@ class VivotekCamera():
                                             % self._security_level)
 
                 try:
-                    requests.post(
+                    response = requests.post(
                         self._set_param_url,
                         auth=self._requests_auth,
                         data={key: value},
                         timeout=10,
                         verify=self.verify_ssl,
                     )
+
+                    response.raise_for_status()
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
 
@@ -153,6 +155,8 @@ class VivotekCamera():
                 
                 try:
                     response = requests.get(self._get_param_url, **request_args)
+                    response.raise_for_status()
+
                     param_entry_lines = response.text.strip().splitlines()
 
                     for line in param_entry_lines:
@@ -242,6 +246,8 @@ class VivotekCamera():
                 
                 try:
                     response = requests.get(self._remotefocus_url, **request_args)
+                    response.raise_for_status()
+
                     param_entry_lines = response.text.strip().splitlines()
 
                     def parse_entries():
@@ -292,7 +298,8 @@ class VivotekCamera():
                     request_args['auth'] = self._requests_auth
                 
                 try:
-                    requests.get(self._remotefocus_url, **request_args)
+                    response = requests.get(self._remotefocus_url, **request_args)
+                    response.raise_for_status()
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
 
@@ -316,6 +323,8 @@ class VivotekCamera():
                 timeout=10,
                 verify=self.verify_ssl,
             )
+
+            response.raise_for_status()
 
             return response.content
         except requests.exceptions.RequestException as error:
