@@ -128,15 +128,13 @@ class VivotekCamera():
                                             % self._security_level)
 
                 try:
-                    response = requests.post(
+                    requests.post(
                         self._set_param_url,
                         auth=self._requests_auth,
                         data={key: value},
                         timeout=10,
                         verify=self.verify_ssl,
                     )
-
-                    return parse_response_value(response)
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
 
