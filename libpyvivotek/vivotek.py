@@ -34,17 +34,20 @@ SECURITY_LEVELS = {
     "admin":        6
 }
 
-def parse_parameter_entry(entry:str) -> tuple:
+def parse_parameter_entry(entry:str) -> tuple or None:
     entry = entry.strip()
 
-    equalsindex = entry.index('=')
+    try:
+        equalsindex = entry.index('=')
+    except ValueError:
+        return None
 
     key = entry[0:equalsindex]
     value = entry[equalsindex+2:-1]
 
     return key, value
 
-def parse_response_value(response:requests.Response) -> str:
+def parse_response_value(response:requests.Response) -> str or None:
     """
     Parse the response from an API call and return the value only.
     This assumes the response is in the key='value' format.
@@ -55,7 +58,12 @@ def parse_response_value(response:requests.Response) -> str:
     if response.status_code == 401:
         raise VivotekCameraError('Unauthorized. Credentials may be invalid.')
 
-    _, value = parse_parameter_entry(response.text)
+    parsed_entry = parse_parameter_entry(response.text)
+
+    if parsed_entry is None:
+        return None
+
+    _, value = parsed_entry
 
     return value
 
@@ -150,7 +158,10 @@ class VivotekCamera():
                     param_entry_lines = response.text.strip().splitlines()
 
                     for line in param_entry_lines:
-                        yield parse_parameter_entry(line)
+                        parsed_entry = parse_parameter_entry(line)
+
+                        if parsed_entry is not None:
+                            yield parsed_entry
                     
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
@@ -235,7 +246,7 @@ class VivotekCamera():
                     response = requests.get(self._remotefocus_url, **request_args)
                     param_entry_lines = response.text.strip().splitlines()
 
-                    return dict(parse_parameter_entry(line) for line in param_entry_lines)
+                    return dict(parse_parameter_entry(line) for line in param_entry_lines if line is not None)
                 except requests.exceptions.RequestException as error:
                     raise VivotekCameraError from error
 
