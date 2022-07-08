@@ -48,8 +48,8 @@ class VivotekCamera():
         else:
             self.verify_ssl = verify_ssl
 
-        if sec_lvl not in SECURITY_LEVELS.keys():
-            raise VivotekCameraError("Invalid security level: %s" % sec_lvl)
+        if sec_lvl not in SECURITY_LEVELS:
+            raise VivotekCameraError(f"Invalid security level: {sec_lvl}")
 
         if usr is None or sec_lvl == 'anonymous':
             self._requests_auth = None
@@ -112,8 +112,8 @@ class VivotekCamera():
     def set_param(self, param, value):
         """Set and return the value of the provided key."""
         if SECURITY_LEVELS[self._security_level] < 4:
-            raise VivotekCameraError("Security level %s is too low to set parameters."
-                                     % self._security_level)
+            raise VivotekCameraError(
+                    f"Security level {self._security_level} is too low to set parameters.")
 
         try:
             response = requests.post(
