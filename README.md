@@ -110,7 +110,7 @@ cam.set_param('event_i0_enable', 0)
 # "0"
 ```
 
-### Developing
+## Developing
 
 Install dependencies and run the test suite for a sanity check.
 
