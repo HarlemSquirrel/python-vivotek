@@ -1,7 +1,6 @@
 # python-vivotek
 
 ![pytest](https://github.com/HarlemSquirrel/python-vivotek/workflows/pytest/badge.svg)
-[![Build Status](https://travis-ci.org/HarlemSquirrel/python-vivotek.svg?branch=master)](https://travis-ci.org/HarlemSquirrel/python-vivotek) 
 [![Maintainability](https://api.codeclimate.com/v1/badges/ebf35560283e051c52cd/maintainability)](https://codeclimate.com/github/HarlemSquirrel/python-vivotek/maintainability)
 
 A Python library for Vivotek IP cameras.
@@ -10,7 +9,9 @@ A Python library for Vivotek IP cameras.
 
 ### Install
 
-This library currently supports Python 3.5 and up.
+This library currently supports Python 3.6 and up.
+
+For Python 3.5 use v0.4.0
 
 ```sh
 pip3 install libpyvivotek
@@ -107,4 +108,14 @@ cam.set_param('event_i0_enable', 1)
 
 cam.set_param('event_i0_enable', 0)
 # "0"
+```
+
+### Developing
+
+Install dependencies and run the test suite for a sanity check.
+
+```
+pip install --user -r requirements_test.txt
+pip install --user pytest
+pytest
 ```
