@@ -5,9 +5,6 @@ import vcr
 from libpyvivotek.vivotek import VivotekCamera, VivotekCameraError
 
 TEST_CONNECTION_DETAILS = dict(
-    # host ='192.168.1.119',
-    # usr = 'root',
-    # pwd = 'BCj21Xfy41pVp9PZ@!',
     host ='fake_ip.local',
     usr = 'test_user',
     pwd = 't3st_p@55w0rdZ',
