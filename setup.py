@@ -15,6 +15,9 @@ setup(
     author_email='HarlemSquirrel@gmail.com',
     url='https://github.com/HarlemSquirrel/python-vivotek',
     license='LGPLv3+',
+    install_requires=[
+        'requests',
+    ],
     packages=find_packages(exclude=["tests", "tests.*"]),
     classifiers=[
         "Programming Language :: Python :: 3",
