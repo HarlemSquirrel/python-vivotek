@@ -58,7 +58,7 @@ import keyring
 from libpyvivotek import VivotekCamera
 
 cam = VivotekCamera(host='192.168.1.123', port=443, usr='user',
-                    pwd=keyring.get_password('camera', 'user'))
+                    pwd=keyring.get_password('camera', 'user'), sec_lvl='admin')
 print("Camera model is %s" % cam.model_name)
 # Camera model is IB8369A
 ```
@@ -74,7 +74,7 @@ from io import BytesIO
 import keyring
 
 cam = VivotekCamera(host='192.168.1.123', port=443, usr='user',
-                    pwd=keyring.get_password('camera', 'user'))
+                    pwd=keyring.get_password('camera', 'user'), sec_lvl='admin')
 
 snapshot = Image.open(BytesIO(cam.snapshot(quality=3)))
 
