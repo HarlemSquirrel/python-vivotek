@@ -16,7 +16,7 @@ setup(
     url='https://github.com/HarlemSquirrel/python-vivotek',
     license='LGPLv3+',
     install_requires=[
-        'requests',
+        'requests >= 2.21',
     ],
     packages=find_packages(exclude=["tests", "tests.*"]),
     classifiers=[
