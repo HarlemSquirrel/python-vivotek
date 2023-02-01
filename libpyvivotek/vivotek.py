@@ -83,7 +83,7 @@ class VivotekCamera():
         try:
             response = requests.get(
                 self._still_image_url,
-                params=dict(quality=quality),
+                params={"quality": quality},
                 auth=self._requests_auth,
                 timeout=10,
                 verify=self.verify_ssl,
@@ -95,11 +95,11 @@ class VivotekCamera():
 
     def get_param(self, param):
         """Return the value of the provided key."""
-        request_args = dict(
-            params=(param),
-            timeout=10,
-            verify=self.verify_ssl
-        )
+        request_args = {
+            "params": param,
+            "timeout": 10,
+            "verify": self.verify_ssl
+        }
         if self._requests_auth is not None:
             request_args['auth'] = self._requests_auth
         try:
