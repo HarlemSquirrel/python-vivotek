@@ -31,6 +31,10 @@ print("Camera model is %s" % cam.model_name)
 # Camera model is IB8369A
 ```
 
+#### Authentication
+
+Some camera models use digest by default so if you know the credentials are correct but are still seeing "Unauthorized" then try with `digest_auth=True`.
+
 #### Security Level
 
 Four security levels are currently supported:
