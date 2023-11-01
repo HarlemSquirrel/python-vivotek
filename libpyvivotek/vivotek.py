@@ -1,4 +1,6 @@
 """A python implementation of the Vivotek IB8369A"""
+from textwrap import wrap
+
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
@@ -92,6 +94,14 @@ class VivotekCamera():
             return response.content
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
+
+    def get_mac(self):
+        """Return the MAC address with colons"""
+        return ":".join(wrap(self.get_serial(), 2))
+
+    def get_serial(self):
+        """Return the serial number which is also the MAC address."""
+        return self.get_param('system_info_serialnumber')
 
     def get_param(self, param):
         """Return the value of the provided key."""
