@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libpyvivotek"
+authors = [
+    {name = "Kevin McCormack", email = "kevin@mccormack.tech"},
+]
+description = "Python Library for Vivotek IP Cameras"
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["Camera", "IPC", "vivotek"]
+license = {text = "LGPLv3+"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "requests",
+]
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/HarlemSquirrel/python-vivotek"
+"Bug Tracker" = "https://github.com/HarlemSquirrel/python-vivotek/issues"
+
+[project.optional-dependencies]
+tests = [
+  "pylint>=2.3",
+  "vcrpy>=2.0"
+]
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools.dynamic]
+version = {attr = "libpyvivotek.VERSION"}
+readme = {file = ["README.md"], content-type = "text/markdown"}
+
+[tool.setuptools.packages.find]
+exclude = ["libpyvivotek.tests*"]

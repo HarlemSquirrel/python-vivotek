@@ -10,8 +10,11 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# Install latest build
+python3 -m pip install --upgrade build
+
 # Build
-python3 setup.py sdist bdist_wheel
+python3 -m build
 
 # Install latest twine
 python3 -m pip install --user --upgrade twine
