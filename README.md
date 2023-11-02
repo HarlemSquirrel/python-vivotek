@@ -1,6 +1,6 @@
 # python-vivotek
 
-![pytest](https://github.com/HarlemSquirrel/python-vivotek/workflows/pytest/badge.svg)
+[![Verify](https://github.com/HarlemSquirrel/python-vivotek/actions/workflows/verify.yml/badge.svg)](https://github.com/HarlemSquirrel/python-vivotek/actions/workflows/verify.yml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/ebf35560283e051c52cd/maintainability)](https://codeclimate.com/github/HarlemSquirrel/python-vivotek/maintainability)
 
 A Python library for Vivotek IP cameras.
