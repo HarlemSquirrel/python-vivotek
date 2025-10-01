@@ -9,7 +9,7 @@ authors = [
 ]
 description = "Python Library for Vivotek IP Cameras"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 keywords = ["Camera", "IPC", "vivotek"]
 license = {text = "LGPLv3+"}
 classifiers = [
@@ -29,6 +29,8 @@ dynamic = ["version"]
 [project.optional-dependencies]
 tests = [
   "pylint>=2.3",
+  "pytest",
+  "mypy>=1.18.1",
   "vcrpy>=2.0"
 ]
 

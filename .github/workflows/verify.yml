@@ -7,14 +7,29 @@ on:
       - main
 
 jobs:
+  check_types:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3'
+        cache: 'pip'
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt -r requirements_test.txt
+    - name: Run mypy
+      run: mypy --install-types --non-interactive libpyvivotek
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v5
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v6
       with:
         python-version: '3'
+        cache: 'pip'
     - name: Install Dependencies
       run: |
         pip install -r requirements.txt -r requirements_test.txt
@@ -27,22 +42,20 @@ jobs:
         os:
           - ubuntu
         python-version:
-          - "3.8"
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
     runs-on: ${{ matrix.os }}-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v5
+    - name: Set up Python
+      uses: actions/setup-python@v6
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3'
+        cache: 'pip'
     - name: Install Dependencies
       run: |
-        pip install pytest
-        pip install -r requirements.txt
-        pip install -r requirements_test.txt
+        pip install -r requirements.txt -r requirements_test.txt
     - name: Run tests
       run: pytest
