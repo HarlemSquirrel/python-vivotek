@@ -1,5 +1,6 @@
 """A python implementation of the Vivotek IB8369A"""
 from textwrap import wrap
+from typing import Any
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -28,8 +29,17 @@ class VivotekCamera():
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, host, sec_lvl, port=None, usr=None, pwd=None, digest_auth=False, ssl=None,
-                 verify_ssl=True):
+    # pylint: disable=too-many-positional-arguments
+    def __init__(self,
+        host: str,
+        sec_lvl: str,
+        port: int|None = None,
+        usr: str = '',
+        pwd: str = '',
+        digest_auth: bool = False,
+        ssl: bool|None = None,
+        verify_ssl: bool = True
+    ) -> None:
         """
         Initialize a camera.
         """
@@ -53,7 +63,9 @@ class VivotekCamera():
         if sec_lvl not in SECURITY_LEVELS:
             raise VivotekCameraError(f"Invalid security level: {sec_lvl}")
 
-        if usr is None or sec_lvl == 'anonymous':
+        self._requests_auth: HTTPBasicAuth | HTTPDigestAuth | None
+
+        if usr == '' or sec_lvl == 'anonymous':
             self._requests_auth = None
             self._security_level = 'anonymous'
         else:
@@ -63,7 +75,7 @@ class VivotekCamera():
             else:
                 self._requests_auth = HTTPBasicAuth(usr, pwd)
 
-        self._model_name = None
+        self._model_name: str | None = None
 
         _protocol = 'https' if self._ssl else 'http'
         self._url_base = _protocol + "://" + self.host
@@ -75,12 +87,12 @@ class VivotekCamera():
         self._set_param_url = self._cgi_url_base + API_PATHS["set"]
         self._still_image_url = self._url_base + CGI_BASE_PATH + "/viewer" + API_PATHS["still"]
 
-    def event_enabled(self, event_key):
+    def event_enabled(self, event_key: str) -> bytes | Any | None:
         """Return true if event for the provided key is enabled."""
         response = self.get_param(event_key)
         return int(response.replace("'", "")) == 1
 
-    def snapshot(self, quality=3):
+    def snapshot(self, quality: int = 3) -> bytes | Any:
         """Return the bytes of current still image."""
         try:
             response = requests.get(
@@ -95,31 +107,30 @@ class VivotekCamera():
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
 
-    def get_mac(self):
+    def get_mac(self) -> str:
         """Return the MAC address with colons"""
         return ":".join(wrap(self.get_serial(), 2))
 
-    def get_serial(self):
+    def get_serial(self) -> str:
         """Return the serial number which is also the MAC address."""
         return self.get_param('system_info_serialnumber')
 
-    def get_param(self, param):
+    def get_param(self, param: str) -> str:
         """Return the value of the provided key."""
-        request_args = {
-            "params": param,
-            "timeout": 10,
-            "verify": self.verify_ssl
-        }
-        if self._requests_auth is not None:
-            request_args['auth'] = self._requests_auth
         try:
-            response = requests.get(self._get_param_url, **request_args)
+            response = requests.get(
+                self._get_param_url,
+                params=param,
+                timeout=10,
+                verify=self.verify_ssl,
+                auth=self._requests_auth
+            )
 
             return self.__parse_response_value(response)
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
 
-    def set_param(self, param, value):
+    def set_param(self, param: str, value: str | int | bool) -> str:
         """Set and return the value of the provided key."""
         if SECURITY_LEVELS[self._security_level] < 4:
             raise VivotekCameraError(
@@ -139,7 +150,7 @@ class VivotekCamera():
             raise VivotekCameraError from error
 
     @property
-    def model_name(self):
+    def model_name(self) -> str:
         """Return the model name of the camera."""
         if self._model_name is not None:
             return self._model_name
@@ -148,7 +159,7 @@ class VivotekCamera():
         return self._model_name
 
     @staticmethod
-    def __parse_response_value(response):
+    def __parse_response_value(response: requests.Response) -> str:
         """
         Parse the response from an API call and return the value only.
         This assumes the response is in the key='value' format.
