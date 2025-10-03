@@ -20,7 +20,7 @@ jobs:
       run: |
         pip install -r requirements.txt -r requirements_test.txt
     - name: Run mypy
-      run: mypy --install-types --non-interactive libpyvivotek
+      run: mypy --install-types --non-interactive libpyvivotek tests
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -34,7 +34,7 @@ jobs:
       run: |
         pip install -r requirements.txt -r requirements_test.txt
     - name: Run pylint
-      run: pylint libpyvivotek
+      run: pylint libpyvivotek tests
   test:
     strategy:
       fail-fast: false
