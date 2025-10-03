@@ -1,6 +1,5 @@
 """A python implementation of the Vivotek IB8369A"""
 from textwrap import wrap
-from typing import Any
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -87,12 +86,12 @@ class VivotekCamera():
         self._set_param_url = self._cgi_url_base + API_PATHS["set"]
         self._still_image_url = self._url_base + CGI_BASE_PATH + "/viewer" + API_PATHS["still"]
 
-    def event_enabled(self, event_key: str) -> bytes | Any | None:
+    def event_enabled(self, event_key: str) -> bool:
         """Return true if event for the provided key is enabled."""
         response = self.get_param(event_key)
         return int(response.replace("'", "")) == 1
 
-    def snapshot(self, quality: int = 3) -> bytes | Any:
+    def snapshot(self, quality: int = 3) -> bytes | None:
         """Return the bytes of current still image."""
         try:
             response = requests.get(
@@ -103,7 +102,12 @@ class VivotekCamera():
                 verify=self.verify_ssl,
             )
 
-            return response.content
+            content_bytes = response.content
+            if not isinstance(content_bytes, bytes):
+                return None
+
+            return content_bytes
+
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
 

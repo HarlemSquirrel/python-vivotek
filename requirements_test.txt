@@ -1,4 +1,4 @@
 mypy>=1.18
 pylint>=2.3
 pytest>=7.1
-vcrpy>=2.0
+vcrpy>=7.0
