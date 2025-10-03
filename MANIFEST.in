@@ -1,0 +1,2 @@
+# MANIFEST.in – keep test files out of the source distribution
+recursive-exclude tests *

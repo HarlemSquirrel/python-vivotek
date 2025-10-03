@@ -42,4 +42,6 @@ version = {attr = "libpyvivotek.VERSION"}
 readme = {file = ["README.md"], content-type = "text/markdown"}
 
 [tool.setuptools.packages.find]
-exclude = ["libpyvivotek.tests*"]
+exclude = [
+    "tests*"
+]
