@@ -2,8 +2,10 @@
 
 from typing import TypedDict, NotRequired
 
+import asyncio
 import inspect
 import unittest
+from unittest.mock import call, patch
 import vcr # type: ignore
 
 from libpyvivotek.vivotek import VivotekCamera, VivotekCameraError
@@ -84,35 +86,60 @@ class TestVivotekCamera(unittest.TestCase):
         with vcr.use_cassette(self.cassette_file_path()):
             self.assertTrue(self.cam.event_enabled('event_i0_enable'))
 
-    def test_model_name_admin(self) -> None:
+    def test_get_model_name_admin(self) -> None:
         """Test model name with admin sec level"""
         with vcr.use_cassette(self.cassette_file_path()):
-            self.assertEqual(self.cam.model_name, 'IB8369A')
+            model_name = self.cam.get_model()
+            self.assertEqual(model_name, 'IB8369A')
 
-    def test_model_name_viewer(self) -> None:
+    def test_get_model_name_viewer(self) -> None:
         """Test get model name with viewer sec level"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] ='viewer'
         self.cam = VivotekCamera(**cam_args)
         with vcr.use_cassette(self.cassette_file_path()):
-            self.assertEqual(self.cam.model_name, 'IB8369A')
+            model_name = self.cam.get_model()
+            self.assertEqual(model_name, 'IB8369A')
 
-    def test_model_name_viewer_digest(self) -> None:
+    def test_get_model_name_viewer_digest(self) -> None:
         """Test model name with viewer using digest auth"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] ='viewer'
         cam_args["digest_auth"] = True
         self.cam = VivotekCamera(**cam_args)
         with vcr.use_cassette(self.cassette_file_path()):
-            self.assertEqual(self.cam.model_name, 'IB8369A')
+            model_name = self.cam.get_model()
+            self.assertEqual(model_name, 'IB8369A')
 
-    def test_model_name_anon(self) -> None:
+    def test_get_model_name_anon(self) -> None:
         """Test get model name with anonymous user"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] ='anonymous'
         self.cam = VivotekCamera(**cam_args)
         with vcr.use_cassette(self.cassette_file_path()):
-            self.assertEqual(self.cam.model_name, 'IB8369A')
+            model_name = self.cam.get_model()
+            self.assertEqual(model_name, 'IB8369A')
+
+    def test_async_set_device_info(self) -> None:
+        """Test async set device info caches model and serial."""
+        with patch.object(self.cam, 'get_param', side_effect=['IB8369A', '123456']) as mock_get_param:
+            asyncio.run(self.cam.async_set_device_info())
+
+        self.assertEqual(self.cam.model_name, 'IB8369A')
+        self.assertEqual(self.cam.serial_number, '123456')
+        self.assertEqual(
+            mock_get_param.call_args_list,
+            [
+                call('system_info_modelname'),
+                call('system_info_serialnumber'),
+            ],
+        )
+
+    def test_get_firmware_version(self) -> None:
+        """Test get firmware version."""
+        with patch.object(self.cam, 'get_param', return_value='0104a') as mock_get_param:
+            self.assertEqual(self.cam.get_firmware_version(), '0104a')
+            mock_get_param.assert_called_once_with('system_info_firmwareversion')
 
     # Setting parameters
     # ------------------

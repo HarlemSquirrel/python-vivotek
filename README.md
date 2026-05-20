@@ -23,10 +23,13 @@ pip3 install --user libpyvivotek
 ### Usage
 
 ```py
+import asyncio
+
 from libpyvivotek import VivotekCamera
 
 cam = VivotekCamera(host='192.168.1.123', port=443, usr='user', pwd='passw0rd',
                     digest_auth=True, ssl=True, verify_ssl=True, sec_lvl='admin')
+asyncio.run(cam.async_set_device_info())
 print("Camera model is %s" % cam.model_name)
 # Camera model is IB8369A
 ```
@@ -38,6 +41,7 @@ Some camera models use digest by default so if you know the credentials are corr
 #### Security Level
 
 Four security levels are currently supported:
+
 - anonymous
 - viewer
 - operator
@@ -63,7 +67,7 @@ from libpyvivotek import VivotekCamera
 
 cam = VivotekCamera(host='192.168.1.123', port=443, usr='user',
                     pwd=keyring.get_password('camera', 'user'), sec_lvl='admin')
-print("Camera model is %s" % cam.model_name)
+print("Camera model is %s" % cam.get_model())
 # Camera model is IB8369A
 ```
 
