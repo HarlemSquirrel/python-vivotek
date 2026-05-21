@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
-
 import keyring
 
 from libpyvivotek import VivotekCamera
@@ -9,7 +7,7 @@ from libpyvivotek import VivotekCamera
 cam = VivotekCamera(host='192.168.2.184', port=80, usr='root',
                     pwd=keyring.get_password('camera', 'root'),
                     sec_lvl="admin")
-asyncio.run(cam.async_set_device_info())
+cam.set_device_info()
 print(f"Camera model:  {cam.model_name}")
 print(f"Firmware:      {cam.get_firmware_version()}")
 print(f"Network info:  {cam.get_param('status_eth_i0')}")
