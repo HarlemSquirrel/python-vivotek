@@ -75,6 +75,7 @@ class VivotekCamera():
                 self._requests_auth = HTTPBasicAuth(usr, pwd)
 
         self._model_name: str | None = None
+        self._serial_number: str | None = None
 
         _protocol = 'https' if self._ssl else 'http'
         self._url_base = _protocol + "://" + self.host
@@ -111,9 +112,24 @@ class VivotekCamera():
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
 
+    def set_device_info(self) -> None:
+        """Set the device info."""
+        if not self._model_name:
+            self._model_name = self.get_model()
+        if not self._serial_number:
+            self._serial_number = self.get_serial()
+
+    def get_firmware_version(self) -> str:
+        """Return the firmware version of the camera."""
+        return self.get_param('system_info_firmwareversion')
+
     def get_mac(self) -> str:
         """Return the MAC address with colons"""
         return ":".join(wrap(self.get_serial(), 2))
+
+    def get_model(self) -> str:
+        """Return the model name of the camera."""
+        return self.get_param('system_info_modelname')
 
     def get_serial(self) -> str:
         """Return the serial number which is also the MAC address."""
@@ -154,13 +170,14 @@ class VivotekCamera():
             raise VivotekCameraError from error
 
     @property
-    def model_name(self) -> str:
-        """Return the model name of the camera."""
-        if self._model_name is not None:
-            return self._model_name
-
-        self._model_name = self.get_param("system_info_modelname")
+    def model_name(self) -> str | None:
+        """Return the cached model name, or None until set_device_info() is called."""
         return self._model_name
+
+    @property
+    def serial_number(self) -> str | None:
+        """Return the cached serial number, or None until set_device_info() is called."""
+        return self._serial_number
 
     @staticmethod
     def __parse_response_value(response: requests.Response) -> str:
