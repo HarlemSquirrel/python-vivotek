@@ -44,7 +44,7 @@ class TestVivotekCamera(unittest.TestCase):
         return f"tests/fixtures/vcr_cassettes/vivotek_camera_{inspect.stack()[1][3][5:]}.yaml"
 
     def setUp(self) -> None:
-        """ "Test setup"""
+        """Test setup"""
         self.cam = VivotekCamera(**TEST_CONNECTION_DETAILS)
 
     def test_security_level_invalid(self) -> None:
