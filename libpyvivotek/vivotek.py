@@ -171,12 +171,12 @@ class VivotekCamera():
 
     @property
     def model_name(self) -> str | None:
-        """Return the model name of the camera."""
+        """Return the cached model name, or None until set_device_info() is called."""
         return self._model_name
 
     @property
     def serial_number(self) -> str | None:
-        """Return the serial number of the camera."""
+        """Return the cached serial number, or None until set_device_info() is called."""
         return self._serial_number
 
     @staticmethod
