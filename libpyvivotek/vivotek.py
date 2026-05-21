@@ -112,8 +112,8 @@ class VivotekCamera():
         except requests.exceptions.RequestException as error:
             raise VivotekCameraError from error
 
-    async def async_set_device_info(self) -> None:
-        """Asynchronously set the device info."""
+    def set_device_info(self) -> None:
+        """Set the device info."""
         if not self._model_name:
             self._model_name = self.get_model()
         if not self._serial_number:

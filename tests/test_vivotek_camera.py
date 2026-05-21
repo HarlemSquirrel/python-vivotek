@@ -2,7 +2,6 @@
 
 from typing import TypedDict, NotRequired
 
-import asyncio
 import inspect
 import unittest
 from unittest.mock import call, patch
@@ -123,12 +122,12 @@ class TestVivotekCamera(unittest.TestCase):
             model_name = self.cam.get_model()
             self.assertEqual(model_name, "IB8369A")
 
-    def test_async_set_device_info(self) -> None:
-        """Test async set device info caches model and serial."""
+    def test_set_device_info(self) -> None:
+        """Test set device info caches model and serial."""
         with patch.object(
             self.cam, "get_param", side_effect=["IB8369A", "123456"]
         ) as mock_get_param:
-            asyncio.run(self.cam.async_set_device_info())
+            self.cam.set_device_info()
 
         self.assertEqual(self.cam.model_name, "IB8369A")
         self.assertEqual(self.cam.serial_number, "123456")
