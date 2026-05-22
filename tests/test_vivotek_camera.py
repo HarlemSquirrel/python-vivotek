@@ -3,9 +3,10 @@
 from typing import TypedDict, NotRequired, AsyncGenerator
 
 import inspect
+from unittest.mock import patch
+
 import pytest
 import pytest_asyncio
-from unittest.mock import patch
 import vcr  # type: ignore
 
 from libpyvivotek.vivotek import VivotekCamera, VivotekCameraError
@@ -36,6 +37,8 @@ TEST_CONNECTION_DETAILS: VivotekCameraConfig = {
 class TestVivotekCamera:
     """Tests for VivotekCamera."""
 
+    cam: VivotekCamera  # Class attribute to avoid pylint W0201
+
     def cassette_file_path(self) -> str:
         """
         Return the cassette file path based on the name of the function that called this function
@@ -47,6 +50,9 @@ class TestVivotekCamera:
 
     @pytest_asyncio.fixture(autouse=True)
     async def setup_cam(self) -> AsyncGenerator[None, None]:
+        """
+        Fixture to set up and tear down the VivotekCamera instance.
+        """
         self.cam = VivotekCamera(**TEST_CONNECTION_DETAILS)
         yield
         await self.cam.close()
