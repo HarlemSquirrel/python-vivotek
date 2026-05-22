@@ -121,3 +121,25 @@ pip install --user -r requirements_test.txt
 pip install --user pytest
 pytest
 ```
+
+### Usage
+
+```py
+import asyncio
+from libpyvivotek import VivotekCamera
+
+async def main():
+    async with VivotekCamera(host='192.168.1.123', port=443, usr='user', pwd='passw0rd',
+                             digest_auth=True, ssl=True, verify_ssl=True, sec_lvl='admin') as cam:
+        await cam.set_device_info()
+        print("Camera model is %s" % cam.model_name)
+        # Camera model is IB8369A
+
+asyncio.run(main())
+```
+
+#### Session Lifecycle
+
+- The library supports injecting an `aiohttp.ClientSession` for shared session reuse.
+- If no session is provided, the library creates and manages its own session.
+- When using the library as a context manager, the session is automatically closed upon exit.

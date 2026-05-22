@@ -1,9 +1,8 @@
 """A python implementation of the Vivotek IB8369A"""
 from textwrap import wrap
 
-import requests
-from requests.auth import HTTPBasicAuth
-from requests.auth import HTTPDigestAuth
+import aiohttp
+from aiohttp import BasicAuth
 
 DEFAULT_EVENT_0_KEY = "event_i0_enable"
 CGI_BASE_PATH = "/cgi-bin"
@@ -37,12 +36,18 @@ class VivotekCamera():
         pwd: str = '',
         digest_auth: bool = False,
         ssl: bool|None = None,
-        verify_ssl: bool = True
+        verify_ssl: bool = True,
+        session: aiohttp.ClientSession | None = None
     ) -> None:
         """
         Initialize a camera.
         """
         self.host = host
+        self._session = session
+        self._internal_session = session is None
+        self._digest_auth = digest_auth
+        self._digest_user: str | None = None
+        self._digest_password: str | None = None
 
         if port is None:
             self._port = 443 if ssl else 80
@@ -62,17 +67,20 @@ class VivotekCamera():
         if sec_lvl not in SECURITY_LEVELS:
             raise VivotekCameraError(f"Invalid security level: {sec_lvl}")
 
-        self._requests_auth: HTTPBasicAuth | HTTPDigestAuth | None
+        self._auth: BasicAuth | None
 
         if usr == '' or sec_lvl == 'anonymous':
-            self._requests_auth = None
+            self._auth = None
             self._security_level = 'anonymous'
+            self._digest_auth = False
         else:
             self._security_level = sec_lvl
             if digest_auth:
-                self._requests_auth = HTTPDigestAuth(usr, pwd)
+                self._auth = None
+                self._digest_user = usr
+                self._digest_password = pwd
             else:
-                self._requests_auth = HTTPBasicAuth(usr, pwd)
+                self._auth = BasicAuth(usr, pwd)
 
         self._model_name: str | None = None
         self._serial_number: str | None = None
@@ -87,87 +95,139 @@ class VivotekCamera():
         self._set_param_url = self._cgi_url_base + API_PATHS["set"]
         self._still_image_url = self._url_base + CGI_BASE_PATH + "/viewer" + API_PATHS["still"]
 
-    def event_enabled(self, event_key: str) -> bool:
+    async def _get_session(self) -> aiohttp.ClientSession:
+        """
+        Return the aiohttp.ClientSession, creating one if necessary.
+        """
+        if self._session is None:
+            self._session = aiohttp.ClientSession()
+        return self._session
+
+    async def close(self) -> None:
+        """
+        Close the aiohttp.ClientSession if it was created internally.
+        """
+        if self._internal_session and self._session:
+            await self._session.close()
+
+    async def __aenter__(self):
+        """
+        Async context manager entry.
+        """
+        await self._get_session()
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        """
+        Async context manager exit.
+        """
+        await self.close()
+
+    async def event_enabled(self, event_key: str) -> bool:
         """Return true if event for the provided key is enabled."""
-        response = self.get_param(event_key)
+        response = await self.get_param(event_key)
         return int(response.replace("'", "")) == 1
 
-    def snapshot(self, quality: int = 3) -> bytes | None:
+    async def snapshot(self, quality: int = 3) -> bytes | None:
         """Return the bytes of current still image."""
         try:
-            response = requests.get(
+            session = await self._get_session()
+            async with session.get(
                 self._still_image_url,
                 params={"quality": quality},
-                auth=self._requests_auth,
-                timeout=10,
-                verify=self.verify_ssl,
-            )
+                auth=self._auth,
+                ssl=self.verify_ssl,
+                timeout=aiohttp.ClientTimeout(total=10),
+            ) as response:
+                content_bytes = await response.read()
+                if not isinstance(content_bytes, bytes):
+                    return None
 
-            content_bytes = response.content
-            if not isinstance(content_bytes, bytes):
-                return None
+                return content_bytes
 
-            return content_bytes
+        except aiohttp.ClientError as error:
+            raise VivotekCameraError(f"AIOHTTP Error: {error}") from error
 
-        except requests.exceptions.RequestException as error:
-            raise VivotekCameraError from error
-
-    def set_device_info(self) -> None:
+    async def set_device_info(self) -> None:
         """Set the device info."""
         if not self._model_name:
-            self._model_name = self.get_model()
+            self._model_name = await self.get_model()
         if not self._serial_number:
-            self._serial_number = self.get_serial()
+            self._serial_number = await self.get_serial()
 
-    def get_firmware_version(self) -> str:
+    async def get_firmware_version(self) -> str:
         """Return the firmware version of the camera."""
-        return self.get_param('system_info_firmwareversion')
+        return await self.get_param('system_info_firmwareversion')
 
-    def get_mac(self) -> str:
+    async def get_mac(self) -> str:
         """Return the MAC address with colons"""
-        return ":".join(wrap(self.get_serial(), 2))
+        serial = await self.get_serial()
+        return ":".join(wrap(serial, 2))
 
-    def get_model(self) -> str:
+    async def get_model(self) -> str:
         """Return the model name of the camera."""
-        return self.get_param('system_info_modelname')
+        return await self.get_param('system_info_modelname')
 
-    def get_serial(self) -> str:
+    async def get_serial(self) -> str:
         """Return the serial number which is also the MAC address."""
-        return self.get_param('system_info_serialnumber')
+        return await self.get_param('system_info_serialnumber')
 
-    def get_param(self, param: str) -> str:
+    async def get_param(self, param: str) -> str:
         """Return the value of the provided key."""
         try:
-            response = requests.get(
-                self._get_param_url,
-                params=param,
-                timeout=10,
-                verify=self.verify_ssl,
-                auth=self._requests_auth
-            )
+            session = await self._get_session()
+            get_url = f"{self._get_param_url}?{param}"
+            async with session.get(
+                get_url,
+                auth=self._auth,
+                ssl=self.verify_ssl,
+                timeout=aiohttp.ClientTimeout(total=10),
+            ) as response:
+                if (
+                    self._digest_auth
+                    and response.status == 401
+                    and self._digest_user
+                    and self._digest_password
+                ):
+                    digest_auth = aiohttp.DigestAuthMiddleware(
+                        login=self._digest_user,
+                        password=self._digest_password,
+                        preemptive=False,
+                    )
+                    if digest_auth._authenticate(response):  # pylint: disable=protected-access
+                        digest_header = await digest_auth._encode(  # pylint: disable=protected-access
+                            "GET", response.url, b""
+                        )
+                        async with session.get(
+                            get_url,
+                            headers={"Authorization": digest_header},
+                            ssl=self.verify_ssl,
+                            timeout=aiohttp.ClientTimeout(total=10),
+                        ) as digest_response:
+                            return await self.__parse_response_value(digest_response)
 
-            return self.__parse_response_value(response)
-        except requests.exceptions.RequestException as error:
-            raise VivotekCameraError from error
+                return await self.__parse_response_value(response)
+        except aiohttp.ClientError as error:
+            raise VivotekCameraError(f"AIOHTTP Error: {error}") from error
 
-    def set_param(self, param: str, value: str | int | bool) -> str:
+    async def set_param(self, param: str, value: str | int | bool) -> str:
         """Set and return the value of the provided key."""
         if SECURITY_LEVELS[self._security_level] < 4:
             raise VivotekCameraError(
-                    f"Security level {self._security_level} is too low to set parameters.")
+                f"Security level {self._security_level} is too low to set parameters.")
 
         try:
-            response = requests.post(
+            session = await self._get_session()
+            async with session.post(
                 self._set_param_url,
-                auth=self._requests_auth,
                 data={param: value},
-                timeout=10,
-                verify=self.verify_ssl,
-            )
-
-            return self.__parse_response_value(response)
-        except requests.exceptions.RequestException as error:
-            raise VivotekCameraError from error
+                auth=self._auth,
+                ssl=self.verify_ssl,
+                timeout=aiohttp.ClientTimeout(total=10),
+            ) as response:
+                return await self.__parse_response_value(response)
+        except aiohttp.ClientError as error:
+            raise VivotekCameraError(f"AIOHTTP Error: {error}") from error
 
     @property
     def model_name(self) -> str | None:
@@ -180,15 +240,16 @@ class VivotekCamera():
         return self._serial_number
 
     @staticmethod
-    def __parse_response_value(response: requests.Response) -> str:
+    async def __parse_response_value(response: aiohttp.ClientResponse) -> str:
         """
         Parse the response from an API call and return the value only.
         This assumes the response is in the key='value' format.
         An error will be raised when ERROR is found in the body of the response.
         """
-        if 'ERROR' in response.text:
-            raise VivotekCameraError(response.text)
-        if response.status_code == 401:
+        text = await response.text()
+        if 'ERROR' in text:
+            raise VivotekCameraError(text)
+        if response.status == 401:
             raise VivotekCameraError('Unauthorized. Credentials may be invalid.')
 
-        return response.text.strip().split('=')[1].replace("'", "")
+        return text.strip().split('=')[1].replace("'", "")
