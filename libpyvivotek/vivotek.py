@@ -110,14 +110,14 @@ class VivotekCamera():
         if self._internal_session and self._session:
             await self._session.close()
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "VivotekCamera":
         """
         Async context manager entry.
         """
         await self._get_session()
         return self
 
-    async def __aexit__(self, exc_type, exc, tb):
+    async def __aexit__(self, exc_type: object, exc: object, tb: object) -> None:
         """
         Async context manager exit.
         """

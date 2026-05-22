@@ -1,6 +1,6 @@
 """Test VivotekCamera"""
 
-from typing import TypedDict, NotRequired
+from typing import TypedDict, NotRequired, AsyncGenerator
 
 import inspect
 import pytest
@@ -46,12 +46,12 @@ class TestVivotekCamera:
 
 
     @pytest_asyncio.fixture(autouse=True)
-    async def setup_cam(self):
+    async def setup_cam(self) -> AsyncGenerator[None, None]:
         self.cam = VivotekCamera(**TEST_CONNECTION_DETAILS)
         yield
         await self.cam.close()
 
-    def test_security_level_invalid(self):
+    def test_security_level_invalid(self) -> None:
         """Test security level validation"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] = "bad_sec_level"
@@ -60,7 +60,7 @@ class TestVivotekCamera:
             VivotekCamera(**cam_args)
 
     @pytest.mark.asyncio
-    async def test_snapshot(self):
+    async def test_snapshot(self) -> None:
         """Test snapshot"""
         with vcr.use_cassette(self.cassette_file_path(), record_mode='none'):
             snapshot = await self.cam.snapshot()
@@ -69,14 +69,14 @@ class TestVivotekCamera:
     # Getting parameters
     # ------------------
     @pytest.mark.asyncio
-    async def test_get_param_error(self):
+    async def test_get_param_error(self) -> None:
         """Test getting param that doesn't exist"""
         with vcr.use_cassette(self.cassette_file_path(), record_mode='none'):
             with pytest.raises(VivotekCameraError):
                 await self.cam.get_param("bogus_param")
 
     @pytest.mark.asyncio
-    async def test_get_param_invalid_credentials(self):
+    async def test_get_param_invalid_credentials(self) -> None:
         """Test get param with invalid credentials"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["pwd"] = "badpassword"
@@ -88,28 +88,28 @@ class TestVivotekCamera:
                 await self.cam.get_param("capability_api_httpversion")
 
     @pytest.mark.asyncio
-    async def test_event_enabled_false(self):
+    async def test_event_enabled_false(self) -> None:
         """Test event enabled false"""
         with vcr.use_cassette(self.cassette_file_path(), record_mode='none'):
             result = await self.cam.event_enabled("event_i0_enable")
             assert not result
 
     @pytest.mark.asyncio
-    async def test_event_enabled_true(self):
+    async def test_event_enabled_true(self) -> None:
         """Test event enabled true"""
         with vcr.use_cassette(self.cassette_file_path(), record_mode='none'):
             result = await self.cam.event_enabled("event_i0_enable")
             assert result
 
     @pytest.mark.asyncio
-    async def test_get_model_name_admin(self):
+    async def test_get_model_name_admin(self) -> None:
         """Test model name with admin sec level"""
         with vcr.use_cassette(self.cassette_file_path(), record_mode='none'):
             model_name = await self.cam.get_model()
             assert model_name == "IB8369A"
 
     @pytest.mark.asyncio
-    async def test_get_model_name_viewer(self):
+    async def test_get_model_name_viewer(self) -> None:
         """Test get model name with viewer sec level"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] = "viewer"
@@ -119,7 +119,7 @@ class TestVivotekCamera:
             assert model_name == "IB8369A"
 
     @pytest.mark.asyncio
-    async def test_get_model_name_viewer_digest(self):
+    async def test_get_model_name_viewer_digest(self) -> None:
         """Test model name with viewer using digest auth"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] = "viewer"
@@ -130,7 +130,7 @@ class TestVivotekCamera:
             assert model_name == "IB8369A"
 
     @pytest.mark.asyncio
-    async def test_get_model_name_anon(self):
+    async def test_get_model_name_anon(self) -> None:
         """Test get model name with anonymous user"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] = "anonymous"
@@ -140,7 +140,7 @@ class TestVivotekCamera:
             assert model_name == "IB8369A"
 
     @pytest.mark.asyncio
-    async def test_set_device_info(self):
+    async def test_set_device_info(self) -> None:
         """Test set device info caches model and serial."""
         with patch.object(
             self.cam, "get_param", side_effect=["IB8369A", "123456"]
@@ -151,7 +151,7 @@ class TestVivotekCamera:
         assert self.cam.serial_number == "123456"
 
     @pytest.mark.asyncio
-    async def test_get_firmware_version(self):
+    async def test_get_firmware_version(self) -> None:
         """Test get firmware version."""
         with patch.object(
             self.cam, "get_param", return_value="0104a"
@@ -161,14 +161,14 @@ class TestVivotekCamera:
     # Setting parameters
     # ------------------
     @pytest.mark.asyncio
-    async def test_set_param_error(self):
+    async def test_set_param_error(self) -> None:
         """Test set param error"""
         with vcr.use_cassette(self.cassette_file_path(), record_mode='none'):
             with pytest.raises(VivotekCameraError):
                 await self.cam.set_param("bogus_param", "some_value")
 
     @pytest.mark.asyncio
-    async def test_set_param_security_level_too_low(self):
+    async def test_set_param_security_level_too_low(self) -> None:
         """Test set param when sec level too low"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] = "viewer"
@@ -178,7 +178,7 @@ class TestVivotekCamera:
             await self.cam.set_param("event_i0_enable", 1)
 
     @pytest.mark.asyncio
-    async def test_set_param_invalid_credentials(self):
+    async def test_set_param_invalid_credentials(self) -> None:
         """Test set param with invalid credentials"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["pwd"] = "badpassword"
@@ -190,19 +190,19 @@ class TestVivotekCamera:
                 await self.cam.set_param("event_i0_enable", 1)
 
     @pytest.mark.asyncio
-    async def test_set_param_enable_event(self):
+    async def test_set_param_enable_event(self) -> None:
         """Test set param to enable event"""
         with vcr.use_cassette(self.cassette_file_path(), record_mode='none'):
             assert await self.cam.set_param("event_i0_enable", 1) == "1"
 
     @pytest.mark.asyncio
-    async def test_set_param_disable_event(self):
+    async def test_set_param_disable_event(self) -> None:
         """Test set param to disable event"""
         with vcr.use_cassette(self.cassette_file_path(), record_mode='none'):
             assert await self.cam.set_param("event_i0_enable", 0) == "0"
 
     @pytest.mark.asyncio
-    async def test_set_param_enable_event_operator(self):
+    async def test_set_param_enable_event_operator(self) -> None:
         """Test set param to enable event as operator"""
         cam_args = TEST_CONNECTION_DETAILS.copy()
         cam_args["sec_lvl"] = "operator"
