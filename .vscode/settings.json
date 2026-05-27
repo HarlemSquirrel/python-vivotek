@@ -1,3 +1,7 @@
 {
-  "makefile.configureOnOpen": true
+  "makefile.configureOnOpen": true,
+  "cSpell.words": [
+    "libpyvivotek",
+    "Vivotek"
+  ]
 }

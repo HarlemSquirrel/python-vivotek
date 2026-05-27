@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "requests",
+    "aiohttp",
 ]
 dynamic = ["version"]
 
@@ -30,6 +30,7 @@ dynamic = ["version"]
 tests = [
   "pylint>=2.3",
   "pytest",
+  "pytest-asyncio",
   "mypy>=1.18.1",
   "vcrpy>=2.0"
 ]
